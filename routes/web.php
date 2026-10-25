@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\PeminjamanController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -61,4 +62,19 @@ Route::post('/register', function (Request $request) {
     ]);
 
     return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan masuk.');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/peminjaman', [PeminjamanController::class, 'index']);
+    Route::get('/peminjaman/tambah', [PeminjamanController::class, 'create']);
+    Route::post('/peminjaman', [PeminjamanController::class, 'store']);
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Route Mahasiswa
+    Route::get('/peminjaman', [PeminjamanController::class, 'index']);
+    Route::get('/peminjaman/tambah', [PeminjamanController::class, 'create']);
+    Route::post('/peminjaman', [PeminjamanController::class, 'store']);
+
+    // Route Admin (Persetujuan Peminjaman)
+    Route::get('/admin/peminjaman', [PeminjamanController::class, 'adminIndex']);
+    Route::post('/admin/peminjaman/{id}/status', [PeminjamanController::class, 'updateStatus']);
 });

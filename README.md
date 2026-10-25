@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
@@ -56,3 +57,13 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+=======
+# SIPLUS-FRAMEWORK
+SIPLUS (Sistem Informasi Peminjaman Ruangan dan Sarana) dikembangkan untuk memenuhi mata kuliah Pengembangan Perangkat Lunak Framework.
+# ANGGOTA KELOMPOK 2
+| No | NIM | Nama Lengkap |
+|:--:|:-----------:|:--------------------------|
+| 1  | 434251020   | Setiyana                      |
+| 2  | 434251030   | Rahel Albertus Bancin         |
+| 3  | 434251036   | Felyna Nadia Suryaningsih     |
+>>>>>>> 9a9a3c57e6778ea96ed767b48e5f98d817568817
