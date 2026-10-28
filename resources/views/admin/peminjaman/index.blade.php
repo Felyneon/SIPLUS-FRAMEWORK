@@ -87,3 +87,98 @@
 
 </body>
 </html>
+{{-- resources/views/admin/peminjaman/index.blade.php --}}
+@extends('layouts.app')
+
+@section('content')
+<div class="container py-4">
+    <h4 class="mb-3">Persetujuan Peminjaman Ruangan</h4>
+
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    @endif
+
+    {{-- Filter status --}}
+    <ul class="nav nav-pills mb-3">
+        <li class="nav-item">
+            <a class="nav-link {{ !request('status') ? 'active' : '' }}"
+               href="{{ route('admin.peminjaman.index') }}">Semua</a>
+        </li>
+        @foreach (['Pending' => 'warning', 'Disetujui' => 'success', 'Ditolak' => 'danger'] as $s => $warna)
+            <li class="nav-item">
+                <a class="nav-link {{ request('status') === $s ? 'active' : '' }}"
+                   href="{{ route('admin.peminjaman.index', ['status' => $s]) }}">
+                    {{ $s }} <span class="badge bg-{{ $warna }}">{{ $jumlah[$s] }}</span>
+                </a>
+            </li>
+        @endforeach
+    </ul>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Peminjam</th>
+                        <th>Ruangan</th>
+                        <th>Jadwal Peminjaman</th>
+                        <th>Keperluan</th>
+                        <th>Status</th>
+                        <th class="text-center" style="width:200px">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($peminjamans as $p)
+                        <tr>
+                            <td>{{ $peminjamans->firstItem() + $loop->index }}</td>
+                            <td>{{ $p->user->name ?? '-' }}</td>
+                            <td>{{ $p->ruangan->nama_ruangan ?? '-' }}</td>
+                            <td>
+                                {{ \Carbon\Carbon::parse($p->tanggal_mulai)->format('d M Y H:i') }}
+                                <br><small class="text-muted">s/d {{ \Carbon\Carbon::parse($p->tanggal_selesai)->format('d M Y H:i') }}</small>
+                            </td>
+                            <td>{{ $p->keperluan }}</td>
+                            <td>
+                                @php
+                                    $badge = ['Pending' => 'warning text-dark', 'Disetujui' => 'success', 'Ditolak' => 'danger'][$p->status] ?? 'secondary';
+                                @endphp
+                                <span class="badge bg-{{ $badge }}">{{ $p->status }}</span>
+                            </td>
+                            <td class="text-center">
+                                @if ($p->status === 'Pending')
+                                    <form action="{{ route('admin.peminjaman.status', $p) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="Disetujui">
+                                        <button class="btn btn-sm btn-success"
+                                                onclick="return confirm('Setujui peminjaman ini?')">✓ Setujui</button>
+                                    </form>
+                                    <form action="{{ route('admin.peminjaman.status', $p) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="Ditolak">
+                                        <button class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Tolak peminjaman ini?')">✗ Tolak</button>
+                                    </form>
+                                @else
+                                    <span class="text-muted small">Sudah diproses</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="text-center text-muted py-4">Belum ada pengajuan peminjaman.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-3">{{ $peminjamans->links() }}</div>
+</div>
+@endsection

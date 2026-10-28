@@ -37,3 +37,19 @@
     <a href="/ruangan">Kembali ke Daftar Ruangan</a>
 </body>
 </html>
+{{-- resources/views/ruangan/create.blade.php --}}
+@extends('layouts.app')
+
+@section('content')
+<div class="container py-4" style="max-width:600px">
+    <h4 class="mb-3">Tambah Ruangan</h4>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form action="{{ route('ruangan.store') }}" method="POST">
+                @csrf
+                @include('ruangan._form')
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
