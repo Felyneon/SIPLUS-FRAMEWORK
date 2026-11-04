@@ -6,24 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('ruangans', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_ruangan'); // Contoh: Lab Komputer 1, Ruang Teori A
-            $table->integer('kapasitas');   // Contoh: 30 orang
-            $table->string('lokasi');       // Contoh: Gedung A Lantai 2
+            $table->string('kode_ruang', 20)->unique();
+            $table->string('nama_ruangan');
+            $table->integer('kapasitas');
+            $table->string('lokasi');
             $table->text('deskripsi')->nullable();
+            $table->string('status', 20)->default('tersedia'); // tersedia | pemeliharaan
             $table->timestamps();
-    });
-}
+        });
+    }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('ruangans');

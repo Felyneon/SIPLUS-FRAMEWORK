@@ -17,9 +17,17 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        User::firstOrCreate(
+            ['email' => 'test@example.com'], // Kunci untuk mencari (agar tidak duplikat)
+            [
+                'name' => 'Test User',
+                'password' => bcrypt('password'), // Tambahkan password jika diperlukan
+            ]
+        );
+        
+        // Jangan lupa panggil seeder ruangan Anda di sini juga jika belum
+        $this->call([
+            RuanganSeeder::class,
         ]);
     }
 }
