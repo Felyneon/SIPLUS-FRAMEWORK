@@ -22,28 +22,36 @@ class PeminjamanController extends Controller
         $ruangans = Ruangan::all(); // Mengambil data ruangan untuk pilihan di form
         return view('peminjaman.create', compact('ruangans'));
     }
+public function store(Request $request)
+{
+    // 1. Validasi data input dari form
+    $request->validate([
+        'nama_matkul' => 'required|string',
+        'dosen_pengampu' => 'required|string',
+        'nama_pjmk' => 'required|string',
+        'prodi' => 'required|string',
+        'gedung' => 'required|string',
+        'ruangan_id' => 'required|string',
+        'tanggal' => 'required|date',
+        'alasan' => 'nullable|string',
+    ]);
 
-    // Menyimpan data pengajuan peminjaman ke database
-    public function store(Request $request)
-    {
-        $request->validate([
-            'ruangan_id'      => 'required|exists:ruangans,id',
-            'tanggal_mulai'   => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'keperluan'       => 'required|string',
-        ]);
+    \App\Models\Peminjaman::create([
+        'user_id' => Auth::id(), 
+        'mata_kuliah' => $request->nama_matkul,
+        'dosen_pengampu' => $request->dosen_pengampu,
+        'nama_pjmk' => $request->nama_pjmk,
+        'prodi' => $request->prodi,
+        'gedung' => $request->gedung,
+        'ruangan_id' => $request->ruangan_id,
+        'tanggal' => $request->tanggal,
+        'alasan' => $request->alasan,
+        'status' => 'Menunggu', 
+    ]);
 
-        Peminjaman::create([
-            'user_id'         => Auth::id(), // ID mahasiswa yang sedang login
-            'ruangan_id'      => $request->ruangan_id,
-            'tanggal_mulai'   => $request->tanggal_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai,
-            'keperluan'       => $request->keperluan,
-            'status'          => 'Pending', // Status awal saat diajukan
-        ]);
-
-        return redirect('/peminjaman')->with('success', 'Pengajuan peminjaman ruangan berhasil dikirim!');
-    }
+    // 3. Redirect kembali ke halaman status dengan pesan sukses
+    return redirect('/peminjaman')->with('success', 'Pengajuan berhasil dikirim!');
+}
 
     // Menampilkan seluruh daftar peminjaman yang masuk untuk Admin
 public function adminIndex()

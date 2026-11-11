@@ -12,11 +12,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/ruangan', [RuanganController::class, 'index']);
-Route::get('/ruangan/tambah', [RuanganController::class, 'create']);
-Route::post('/ruangan', [RuanganController::class, 'store']);
-
-// Auth
+// Auth Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
@@ -31,6 +27,8 @@ Route::post('/register', function (Request $request) {
         'email' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:8|confirmed',
         'role' => 'required|in:mahasiswa,pengelola',
+        'nim' => 'nullable|required_if:role,mahasiswa|string',
+        'nip' => 'nullable|required_if:role,pengelola|string',
     ]);
 
     User::create([
@@ -45,15 +43,26 @@ Route::post('/register', function (Request $request) {
     return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan masuk.');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth');
-
+// Protected Routes (Harus Login)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/ruangan', [RuanganController::class, 'index']);
-    Route::get('/ruangan/tambah', [RuanganController::class, 'create']);
-    Route::post('/ruangan', [RuanganController::class, 'store']);
-    Route::get('/ruangan/{ruangan}/edit', [RuanganController::class, 'edit']);
-    Route::put('/ruangan/{ruangan}', [RuanganController::class, 'update']);
-    Route::delete('/ruangan/{ruangan}', [RuanganController::class, 'destroy']);
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    });
+
+    // Ruangan (Dengan nama route lengkap agar tidak error)
+    Route::get('/ruangan', [RuanganController::class, 'index'])->name('ruangan.index');
+    Route::get('/ruangan/create', [RuanganController::class, 'create'])->name('ruangan.create');
+    Route::post('/ruangan', [RuanganController::class, 'store'])->name('ruangan.store');
+    Route::get('/ruangan/{ruangan}/edit', [RuanganController::class, 'edit'])->name('ruangan.edit');
+    Route::put('/ruangan/{ruangan}', [RuanganController::class, 'update'])->name('ruangan.update');
+    Route::delete('/ruangan/{ruangan}', [RuanganController::class, 'destroy'])->name('ruangan.destroy');
+
+    // Peminjaman (Mahasiswa)
+    Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
+    Route::get('/peminjaman/tambah', [PeminjamanController::class, 'create'])->name('peminjaman.create');
+    Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
+
+    // Admin: persetujuan peminjaman
+    Route::get('/admin/peminjaman', [PeminjamanController::class, 'adminIndex'])->name('admin.peminjaman.index');
+    Route::post('/admin/peminjaman/{id}/status', [PeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.status');
 });
