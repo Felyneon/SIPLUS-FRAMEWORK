@@ -32,65 +32,24 @@ Route::middleware('auth')->group(function () {
         Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
         Route::delete('/peminjaman/{peminjaman}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
     });
-});
 
-// --- Khusus pengelola (role 1) ---
-Route::middleware(['auth', 'isAdministrator'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    // --- Khusus pengelola (role 1) ---
+    Route::middleware('isAdministrator')->group(function () {
+        Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
-    // Ruangan: operasi tulis
-    Route::get('/ruangan/tambah', [RuanganController::class, 'create'])->name('ruangan.create');
-// Auth Routes
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+        // Ruangan: operasi tulis
+        Route::get('/ruangan/tambah', [RuanganController::class, 'create'])->name('ruangan.create');
+        Route::post('/ruangan', [RuanganController::class, 'store'])->name('ruangan.store');
+        Route::get('/ruangan/{ruangan}/edit', [RuanganController::class, 'edit'])->name('ruangan.edit');
+        Route::put('/ruangan/{ruangan}', [RuanganController::class, 'update'])->name('ruangan.update');
+        Route::delete('/ruangan/{ruangan}', [RuanganController::class, 'destroy'])->name('ruangan.destroy');
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
-});
+        // Persetujuan peminjaman
+        Route::get('/admin/peminjaman', [PeminjamanController::class, 'adminIndex'])->name('admin.peminjaman.index');
+        Route::post('/admin/peminjaman/{peminjaman}/status', [PeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.status');
 
-Route::post('/register', function (Request $request) {
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:8|confirmed',
-        'role' => 'required|in:mahasiswa,pengelola',
-        'nim' => 'nullable|required_if:role,mahasiswa|string',
-        'nip' => 'nullable|required_if:role,pengelola|string',
-    ]);
-
-    User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role' => $request->role,
-        'nim' => $request->role === 'mahasiswa' ? $request->nim : null,
-        'nip' => $request->role === 'pengelola' ? $request->nip : null,
-    ]);
-
-    return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan masuk.');
-});
-
-// Protected Routes (Harus Login)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
+        // Pengguna dan peran
+        Route::get('/admin/pengguna', [UserController::class, 'index'])->name('admin.pengguna.index');
+        Route::patch('/admin/pengguna/{user}/role', [UserController::class, 'updateRole'])->name('admin.pengguna.role');
     });
-
-    // Ruangan (Dengan nama route lengkap agar tidak error)
-    Route::get('/ruangan', [RuanganController::class, 'index'])->name('ruangan.index');
-    Route::get('/ruangan/create', [RuanganController::class, 'create'])->name('ruangan.create');
-    Route::post('/ruangan', [RuanganController::class, 'store'])->name('ruangan.store');
-    Route::get('/ruangan/{ruangan}/edit', [RuanganController::class, 'edit'])->name('ruangan.edit');
-    Route::put('/ruangan/{ruangan}', [RuanganController::class, 'update'])->name('ruangan.update');
-    Route::delete('/ruangan/{ruangan}', [RuanganController::class, 'destroy'])->name('ruangan.destroy');
-
-    // Persetujuan peminjaman
-    Route::get('/admin/peminjaman', [PeminjamanController::class, 'adminIndex'])->name('admin.peminjaman.index');
-    Route::post('/admin/peminjaman/{peminjaman}/status', [PeminjamanController::class, 'updateStatus'])->name('admin.peminjaman.status');
-
-    // Pengguna dan peran
-    Route::get('/admin/pengguna', [UserController::class, 'index'])->name('admin.pengguna.index');
-    Route::patch('/admin/pengguna/{user}/role', [UserController::class, 'updateRole'])->name('admin.pengguna.role');
-}); 
+});
