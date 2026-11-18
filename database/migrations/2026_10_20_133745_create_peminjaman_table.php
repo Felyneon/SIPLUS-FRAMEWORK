@@ -21,6 +21,9 @@ return new class extends Migration
             $table->dateTime('tanggal_selesai');
             $table->text('keperluan');
             $table->enum('status', ['Pending', 'Disetujui', 'Ditolak'])->default('Pending');
+            $table->enum('status', ['Pending', 'Disetujui', 'Ditolak'])->default('Pending');
+            $table->text('alasan_penolakan')->nullable(); // <-- Ditambahkan agar langsung siap
+            $table->timestamps();
             $table->timestamps();
 
         });
@@ -31,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('peminjamen');
+        Schema::dropIfExists('peminjaman');
     }
 };

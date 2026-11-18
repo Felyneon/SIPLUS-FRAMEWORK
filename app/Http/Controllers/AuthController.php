@@ -2,51 +2,79 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Models\Role;
+use App\Models\User;
+use App\Models\UserRole;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-   
-    // Menampilkan form login
-    public function showLogin()
+    // GET /login
+    public function showLogin(): View
     {
-        return view('auth.login');
+        return view('halaman.login');
     }
 
-    // Memproses data yang diinput user saat login
-    public function login(Request $request)
+    // POST /login
+    public function login(LoginRequest $request): RedirectResponse
     {
-        // Validasi input
-        $credentials = $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        // Cek kecocokan data menggunakan Auth::attempt()
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            // Jika benar, arahkan ke halaman dashboard
-            return redirect()->intended('/dashboard')
-                             ->with('success', 'Berhasil login!');
+        // Validasi sudah dijalankan oleh LoginRequest
+        if (! Auth::attempt($request->validated(), $request->boolean('remember'))) {
+            return back()
+                ->withErrors(['email' => 'Email atau password yang kamu masukkan salah.'])
+                ->onlyInput('email');
         }
 
-        // Jika salah, kembalikan ke halaman login dengan pesan error
-        return back()->withErrors([
-            'email' => 'Email atau password yang kamu masukkan salah.',
-        ])->onlyInput('email');
+        $request->session()->regenerate();
+
+        // Role dibaca SETELAH login berhasil, lalu disimpan sekali di session
+        session(['user_role' => Auth::user()->roleId()]);
+
+        return redirect()->intended(route('dashboard'))
+            ->with('success', 'Berhasil login!');
     }
 
-    // Proses logout
-    public function logout(Request $request)
+    // GET /register
+    public function showRegister(): View
+    {
+        return view('halaman.register');
+    }
+
+    // POST /register
+    public function register(RegisterRequest $request): RedirectResponse
+    {
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => $request->role,
+            'nim'      => $request->role === 'mahasiswa' ? $request->nim : null,
+            'nip'      => $request->role === 'pengelola' ? $request->nip : null,
+        ]);
+
+        UserRole::create([
+            'user_id' => $user->id,
+            'role_id' => $request->role === 'pengelola' ? Role::PENGELOLA : Role::MAHASISWA,
+        ]);
+
+        return redirect()->route('login')
+            ->with('success', 'Registrasi berhasil! Silakan masuk.');
+    }
+
+    // POST /logout
+    public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect()->route('login')->with('status', 'Anda telah keluar.');
     }
 }
-

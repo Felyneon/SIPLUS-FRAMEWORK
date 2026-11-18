@@ -2,70 +2,110 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\StorePeminjamanRequest;
+use App\Http\Requests\UpdateStatusPeminjamanRequest;
 use App\Models\Peminjaman;
 use App\Models\Ruangan;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class PeminjamanController extends Controller
 {
-    // Menampilkan riwayat peminjaman milik user yang sedang login
-    public function index()
+    // GET /peminjaman : riwayat milik pengguna yang login
+    public function index(Request $request): View
     {
-        $peminjamans = Peminjaman::with('ruangan')->where('user_id', Auth::id())->get();
-        return view('peminjaman.index', compact('peminjamans'));
+        $status = $this->statusFilter($request);
+
+        $peminjamans = Peminjaman::with('ruangan')
+            ->where('user_id', Auth::id())
+            ->when($status, fn ($query) => $query->where('status', $status))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('peminjaman.index', compact('peminjamans', 'status'));
     }
 
-    // Menampilkan form pengajuan peminjaman ruangan
-    public function create()
+    // GET /peminjaman/tambah : form pengajuan
+    public function create(Request $request): View
     {
-        $ruangans = Ruangan::all(); // Mengambil data ruangan untuk pilihan di form
-        return view('peminjaman.create', compact('ruangans'));
+        $ruangans = Ruangan::where('status', Ruangan::STATUS_TERSEDIA)
+            ->orderBy('kode_ruang')
+            ->get();
+
+        $ruanganDipilih = $request->query('ruangan');
+
+        return view('peminjaman.create', compact('ruangans', 'ruanganDipilih'));
     }
 
-    // Menyimpan data pengajuan peminjaman ke database
-    public function store(Request $request)
+    // POST /peminjaman : simpan pengajuan
+    public function store(StorePeminjamanRequest $request): RedirectResponse
     {
-        $request->validate([
-            'ruangan_id'      => 'required|exists:ruangans,id',
-            'tanggal_mulai'   => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'keperluan'       => 'required|string',
-        ]);
-
         Peminjaman::create([
-            'user_id'         => Auth::id(), // ID mahasiswa yang sedang login
-            'ruangan_id'      => $request->ruangan_id,
-            'tanggal_mulai'   => $request->tanggal_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai,
-            'keperluan'       => $request->keperluan,
-            'status'          => 'Pending', // Status awal saat diajukan
+            ...$request->validated(),
+            'user_id' => Auth::id(),
+            'status'  => Peminjaman::STATUS_PENDING,
         ]);
 
-        return redirect('/peminjaman')->with('success', 'Pengajuan peminjaman ruangan berhasil dikirim!');
+        return redirect()->route('peminjaman.index')
+            ->with('success', 'Pengajuan peminjaman ruangan berhasil dikirim!');
     }
 
-    // Menampilkan seluruh daftar peminjaman yang masuk untuk Admin
-public function adminIndex()
-{
-    $peminjamans = Peminjaman::with(['user', 'ruangan'])->get();
-    return view('admin.peminjaman.index', compact('peminjamans'));
+    // DELETE /peminjaman/{peminjaman} : membatalkan pengajuan milik sendiri
+    public function destroy(Peminjaman $peminjaman): RedirectResponse
+    {
+        abort_unless((int) $peminjaman->user_id === (int) Auth::id(), 403);
+
+        if ($peminjaman->status !== Peminjaman::STATUS_PENDING) {
+            return back()->with('error', 'Hanya pengajuan berstatus Pending yang dapat dibatalkan.');
+        }
+
+        $peminjaman->delete();
+
+        return back()->with('success', 'Pengajuan berhasil dibatalkan.');
+    }
+
+    // GET /admin/peminjaman : seluruh pengajuan (pengelola)
+    public function adminIndex(Request $request): View
+    {
+        $status = $this->statusFilter($request);
+
+        $peminjamans = Peminjaman::with(['user', 'ruangan'])
+            ->when($status, fn ($query) => $query->where('status', $status))
+            ->orderByRaw("CASE status WHEN 'Pending' THEN 0 ELSE 1 END")   // Pending paling atas
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $ringkasan = Peminjaman::selectRaw('status, COUNT(*) AS total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return view('admin.peminjaman.index', compact('peminjamans', 'status', 'ringkasan'));
+    }
+
+    // POST /admin/peminjaman/{peminjaman}/status : setuju atau tolak (pengelola)
+    public function updateStatus(UpdateStatusPeminjamanRequest $request, Peminjaman $peminjaman): RedirectResponse
+    {
+        $status = $request->validated('status');
+
+        $peminjaman->update([
+            'status'           => $status,
+            'alasan_penolakan' => $status === Peminjaman::STATUS_DITOLAK
+                ? $request->validated('alasan_penolakan')
+                : null,
+        ]);
+
+        return back()->with('success', "Pengajuan berhasil diubah menjadi {$status}.");
+    }
+
+    // Filter ?status=... hanya diterima bila termasuk daftar status yang sah
+    private function statusFilter(Request $request): ?string
+    {
+        $status = $request->query('status');
+
+        return in_array($status, Peminjaman::STATUS, true) ? $status : null;
+    }
 }
-
-// Mengubah status peminjaman (Disetujui / Ditolak)
-public function updateStatus(Request $request, $id)
-{
-    $peminjaman = Peminjaman::findOrFail($id);
-    
-    $request->validate([
-        'status' => 'required|in:Disetujui,Ditolak',
-    ]);
-
-    $peminjaman->update([
-        'status' => $request->status
-    ]);
-
-    return redirect()->back()->with('success', 'Status peminjaman berhasil diperbarui!');
-}
-}
-
