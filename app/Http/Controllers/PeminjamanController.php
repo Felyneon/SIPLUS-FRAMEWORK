@@ -39,7 +39,6 @@ class PeminjamanController extends Controller
 
         return view('peminjaman.create', compact('ruangans', 'ruanganDipilih'));
     }
-
     // POST /peminjaman : simpan pengajuan
     public function store(StorePeminjamanRequest $request): RedirectResponse
     {
