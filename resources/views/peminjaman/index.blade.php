@@ -101,7 +101,7 @@
             <span class="text-gray-700 font-medium">Riwayat Peminjaman</span>
         </div>
 
-        <!-- Bagian Konten Utama (Lebar container dinaikkan ke max-w-6xl agar lebih proporsional) -->
+        <!-- Bagian Konten Utama -->
         <div class="p-8 max-w-6xl w-full mx-auto space-y-6">
             
             <div class="flex items-center justify-between">
@@ -115,9 +115,10 @@
             <div class="space-y-4">
                 @forelse($peminjamans as $item)
                     @php
-                        $statusText = $item->status; 
-                        $isDisetujui = in_array(strtolower($statusText), ['disetujui', 'approved']);
-                        $isDitolak = in_array(strtolower($statusText), ['ditolak', 'rejected']);
+                        $statusText = strtolower(trim($item->status ?? '')); 
+                        $isDisetujui = in_array($statusText, ['disetujui', 'approved'], true);
+                        $isDitolak = in_array($statusText, ['ditolak', 'rejected'], true);
+                        $isPending = in_array($statusText, ['pending', 'menunggu', 'menunggu verifikasi'], true) || $statusText === '';
                     @endphp
 
                     <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3 transition hover:border-blue-300">
@@ -136,10 +137,10 @@
                                         @elseif($isDitolak)
                                             <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Ditolak</span>
                                         @else
-                                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Menunggu Verifikasi</span>
+                                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Menunggu</span>
                                         @endif
                                     </div>
-                                    <p class="text-xs text-gray-600 font-medium mt-0.5">{{ $item->keperluan ?? 'Kegiatan Akademik' }}</p>
+                                    <p class="text-xs text-gray-600 font-medium mt-0.5">{{ $item->nama_mata_kuliah ?? 'Kuliah Pengganti' }} - {{ $item->alasan ?? 'Kegiatan Akademik' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -149,7 +150,7 @@
                             <div class="flex items-center space-x-3">
                                 <span class="flex items-center font-medium text-gray-700">
                                     <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    {{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d M Y') }}
+                                    Pelaksanaan: {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}
                                 </span>
                             </div>
 
@@ -159,18 +160,15 @@
                                     <span>Pilih Jam Pinjam & Cetak Surat</span>
                                 </a>
                             @else
-                                <span class="text-[11px] text-gray-400 italic">Menunggu persetujuan untuk memilih jam</span>
+                                <span class="text-[11px] text-amber-600 font-semibold">Menunggu persetujuan pengelola</span>
                             @endif
                         </div>
                     </div>
                 @empty
-                    <!-- Tampilan Kosong Diperbesar (Lebar, Padding, Ukuran Ikon, dan Font Dinaikkan) -->
                     <div class="bg-white border border-gray-200 rounded-3xl py-32 px-12 text-center space-y-8 shadow-sm flex flex-col items-center justify-center">
-                        <!-- Ikon Diperbesar -->
                         <div class="w-36 h-36 bg-blue-50 text-blue-600 rounded-[2.5rem] flex items-center justify-center shadow-sm">
                             <svg class="w-20 h-20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                         </div>
-                        <!-- Font dan Teks Dinaikkan Ukurannya -->
                         <div class="space-y-3 max-w-lg mx-auto">
                             <h4 class="text-2xl font-extrabold text-gray-900 tracking-tight">Belum ada riwayat peminjaman</h4>
                             <p class="text-base text-gray-500 leading-relaxed">Kamu belum pernah mengajukan peminjaman ruangan. Silakan lakukan peminjaman ruangan melalui menu Beranda.</p>

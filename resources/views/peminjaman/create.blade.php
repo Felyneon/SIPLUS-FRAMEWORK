@@ -32,9 +32,8 @@
             <div class="px-4 py-2">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">MENU UTAMA</p>
                 <nav class="space-y-1">
-                    <!-- Beranda Dibuat Menyala / Aktif -->
-                    <a href="{{ url('/dashboard') }}" class="flex items-center px-3 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg transition">
-                        <svg class="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <a href="{{ url('/dashboard') }}" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition">
+                        <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         Beranda
                     </a>
                     
@@ -59,7 +58,6 @@
                         <span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">SOON</span>
                     </a>
 
-                    <!-- Tambah Ruangan Hanya Muncul untuk Pengelola -->
                     @if(isset($isPengelola) && $isPengelola)
                         <a href="{{ url('/ruangan/create') }}" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition">
                             <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -95,17 +93,14 @@
 
     <!-- KONTEN UTAMA -->
     <main class="flex-1 flex flex-col overflow-y-auto">
-        <!-- Breadcrumb Header -->
         <div class="bg-white px-8 py-3 border-b border-gray-200 text-xs text-gray-500 flex items-center space-x-2">
             <span class="text-blue-600 font-medium">SIPLUS</span>
             <span>›</span>
             <span class="text-gray-700 font-medium">Pengajuan Pinjam Ruangan</span>
         </div>
 
-        <!-- Bagian Konten Form -->
         <div class="p-8 max-w-7xl w-full mx-auto space-y-6">
             
-            <!-- Judul & Badge Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Pengajuan Pinjam Ruangan</h2>
@@ -117,7 +112,6 @@
                 </div>
             </div>
 
-            <!-- Layout 2 Kolom -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <!-- KOLOM KIRI (Formulir Pengajuan) -->
@@ -135,20 +129,20 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Nama Mata Kuliah</label>
-                                    <input type="text" name="mata_kuliah" placeholder="Misal: Aljabar Linear" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                    <input type="text" name="nama_mata_kuliah" placeholder="Misal: Aljabar Linear" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Dosen Pengampu</label>
-                                    <input type="text" name="dosen" placeholder="Nama dosen beserta gelar" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                    <input type="text" name="dosen_pengampu" placeholder="Nama dosen beserta gelar" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Nama PJMK / Pemohon & NIM</label>
-                                    <input type="text" name="pemohon" value="{{ $user->nama ?? $user->name ?? '' }} - {{ $user->nim ?? '434251030' }}" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                    <input type="text" name="nama_pjmk" value="{{ $user->nama ?? $user->name ?? '' }} - {{ $user->nim ?? '434251030' }}" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Program Studi</label>
-                                    <select name="prodi" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
-                                        <option value="D4 Teknologi Informasi">D4 Teknologi Informasi (TI-B1)</option>
+                                    <select name="program_studi" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                        <option value="D4 Teknologi Informasi (TI-B1)">D4 Teknologi Informasi (TI-B1)</option>
                                         <option value="D3 Sistem Informasi">D3 Sistem Informasi</option>
                                         <option value="D3 Teknik Otomasi">D3 Teknik Otomasi</option>
                                     </select>
@@ -166,24 +160,23 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Pilihan Ruangan (Terkunci)</label>
-                                    <!-- Input hidden agar ID ruangan tetap terkirim saat submit form -->
+                                    <!-- Input hidden agar ID ruangan tetap terkirim ke database -->
                                     <input type="hidden" name="ruangan_id" value="{{ $ruanganDipilih->id ?? '' }}">
                                     
-                                    <!-- Kotak Teks Informasi Ruangan Dinamis Sesuai Database -->
                                     <div class="w-full px-3 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 flex items-center justify-between">
                                         <span>{{ $ruanganDipilih->kode_ruang ?? '-' }} - {{ $ruanganDipilih->nama_ruang ?? 'Ruang Kuliah' }}</span>
                                         <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">Terkunci</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Tanggal Pelaksanaan PHL (MM/DD/YYYY)</label>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Tanggal Pelaksanaan PHL</label>
                                     <input type="date" name="tanggal" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
                                 </div>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-gray-700 mb-1">Alasan / Keterangan Kuliah Pengganti</label>
-                                <textarea name="keperluan" rows="3" placeholder="Misal: Kuliah pengganti pertemuan ke-7 yang tertunda karena agenda seminar nasional dosen..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500"></textarea>
+                                <textarea name="alasan" rows="3" placeholder="Misal: Kuliah pengganti pertemuan ke-7 yang tertunda karena agenda seminar nasional dosen..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500"></textarea>
                             </div>
                         </div>
 
@@ -211,10 +204,8 @@
                     </form>
                 </div>
 
-                <!-- KOLOM KANAN (Preview Ruangan Dinamis & Ketentuan Sarpras) -->
+                <!-- KOLOM KANAN -->
                 <div class="space-y-4">
-                    
-                    <!-- Card Preview Ruangan -->
                     <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm space-y-3">
                         <div class="w-full h-32 bg-gradient-to-br from-blue-900 to-indigo-900 rounded-xl relative overflow-hidden flex items-center justify-center text-blue-200 font-medium text-xs">
                             <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]"></div>
@@ -227,7 +218,6 @@
                         <p class="text-[11px] text-gray-500">{{ $ruanganDipilih->nama_ruang ?? 'Ruang Kuliah' }}</p>
                     </div>
 
-                    <!-- Card Ketentuan PHL Sarpras -->
                     <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3">
                         <h4 class="font-bold text-gray-900 text-xs flex items-center">
                             <svg class="w-4 h-4 mr-1.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -239,22 +229,9 @@
                             <li>Pastikan mematikan AC, lampu, dan LCD proyektor setelah selesai menggunakan ruangan.</li>
                         </ul>
                     </div>
-
-                    <!-- Card Bantuan Kendala Jadwal -->
-                    <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div>
-                            <h5 class="text-xs font-bold text-gray-900">Ada Kendala Jadwal?</h5>
-                            <p class="text-[10px] text-gray-500 mt-0.5">Hubungi Ruang Sarpras Gd. B Lt. 1 (Ext: 214)</p>
-                        </div>
-                    </div>
-
                 </div>
 
             </div>
-
         </div>
     </main>
 </body>
