@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RuanganRequest;
+use App\Models\Peminjaman;
 use App\Models\Ruangan;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class RuanganController extends Controller
 {
-    public function index(Request $request)
+    // GET /ruangan (pengelola dan mahasiswa)
+    public function index(Request $request): View
     {
         $q = trim((string) $request->query('q'));
 
         $ruangans = Ruangan::query()
             ->when($q !== '', function ($query) use ($q) {
-                $like = '%'.strtolower($q).'%';
+                $like = '%' . strtolower($q) . '%';
                 $query->where(function ($w) use ($like) {
                     $w->whereRaw('LOWER(nama_ruangan) LIKE ?', [$like])
                         ->orWhereRaw('LOWER(kode_ruang) LIKE ?', [$like])
@@ -28,46 +32,47 @@ class RuanganController extends Controller
         return view('ruangan.index', compact('ruangans', 'q'));
     }
 
-    public function create()
+    // GET /ruangan/tambah (pengelola)
+    public function create(): View
     {
         return view('ruangan.create');
     }
 
-    public function store(Request $request)
+    // POST /ruangan (pengelola)
+    public function store(RuanganRequest $request): RedirectResponse
     {
-        Ruangan::create($this->validated($request));
+        Ruangan::create($request->validated());
 
-        return redirect('/ruangan')->with('success', 'Ruangan berhasil ditambahkan.');
+        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil ditambahkan.');
     }
 
-    public function edit(Ruangan $ruangan)
+    // GET /ruangan/{ruangan}/edit (pengelola)
+    public function edit(Ruangan $ruangan): View
     {
         return view('ruangan.edit', compact('ruangan'));
     }
 
-    public function update(Request $request, Ruangan $ruangan)
+    // PUT /ruangan/{ruangan} (pengelola)
+    public function update(RuanganRequest $request, Ruangan $ruangan): RedirectResponse
     {
-        $ruangan->update($this->validated($request, $ruangan));
+        $ruangan->update($request->validated());
 
-        return redirect('/ruangan')->with('success', 'Data ruangan berhasil diperbarui.');
+        return redirect()->route('ruangan.index')->with('success', 'Data ruangan berhasil diperbarui.');
     }
 
-    public function destroy(Ruangan $ruangan)
+    // DELETE /ruangan/{ruangan} (pengelola)
+    public function destroy(Ruangan $ruangan): RedirectResponse
     {
+        // FK peminjaman memakai onDelete('cascade'): menghapus ruangan akan menghapus seluruh riwayatnya
+        if (Peminjaman::where('ruangan_id', $ruangan->id)->exists()) {
+            return redirect()->route('ruangan.index')->with(
+                'error',
+                'Ruangan memiliki riwayat peminjaman dan tidak dapat dihapus. Ubah statusnya menjadi Pemeliharaan.'
+            );
+        }
+
         $ruangan->delete();
 
-        return redirect('/ruangan')->with('success', 'Ruangan berhasil dihapus.');
-    }
-
-    private function validated(Request $request, ?Ruangan $ruangan = null): array
-    {
-        return $request->validate([
-            'kode_ruang' => ['required', 'string', 'max:20', Rule::unique('ruangans', 'kode_ruang')->ignore($ruangan?->id)],
-            'nama_ruangan' => ['required', 'string', 'max:255'],
-            'kapasitas' => ['required', 'integer', 'min:1', 'max:5000'],
-            'lokasi' => ['required', 'string', 'max:255'],
-            'deskripsi' => ['nullable', 'string'],
-            'status' => ['required', Rule::in(array_keys(Ruangan::STATUS))],
-        ]);
+        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil dihapus.');
     }
 }

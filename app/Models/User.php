@@ -7,35 +7,51 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'role', 'nim', 'nip'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'nim',
-        'nip',
-    ];
+    public const PASSWORD_MIN = 8;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
+    }
+
+    public function userRole(): HasOne
+    {
+        return $this->hasOne(UserRole::class);
+    }
+
+    public function peminjaman(): HasMany
+    {
+        return $this->hasMany(Peminjaman::class);
+    }
+
+    public function roleId(): ?int
+    {
+        $roleId = UserRole::where('user_id', $this->id)->value('role_id');
+
+        if ($roleId) {
+            return (int) $roleId;
+        }
+
+        // Cadangan untuk akun lama yang belum punya baris user_roles
+        return match ($this->role) {
+            'pengelola' => Role::PENGELOLA,
+            'mahasiswa' => Role::MAHASISWA,
+            default     => null,
+        };
     }
 }
