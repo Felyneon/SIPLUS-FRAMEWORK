@@ -44,6 +44,13 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        return view('dashboard', compact('isPengelola', 'ringkasan', 'terbaru'));
+        $user = Auth::user();
+
+        $ruangans = Ruangan::where('status', Ruangan::STATUS_TERSEDIA)
+            ->orderBy('id', 'asc')
+            ->take(3)
+            ->get();
+
+        return view('dashboard', compact('isPengelola', 'ringkasan', 'terbaru', 'user', 'ruangans'));
     }
 }

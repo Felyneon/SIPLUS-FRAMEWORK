@@ -50,7 +50,7 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): RedirectResponse
     {
         $user = User::create([
-            'name'     => $request->name,
+            'name'     => $request->name,  // Diubah dari 'name' menjadi 'nama' sesuai database
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role,

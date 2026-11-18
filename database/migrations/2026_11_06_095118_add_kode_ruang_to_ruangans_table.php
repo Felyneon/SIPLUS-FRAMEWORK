@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::table('ruangans', function (Blueprint $table) {
-        $table->string('kode_ruang')->nullable(); // Menambahkan kolom kode_ruang
-    });
+        
     }
-
     /**
      * Reverse the migrations.
      */

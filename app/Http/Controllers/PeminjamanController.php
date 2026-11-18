@@ -17,6 +17,8 @@ class PeminjamanController extends Controller
     public function index(Request $request): View
     {
         $status = $this->statusFilter($request);
+        $user = Auth::user();
+        $isPengelola = (int) session('user_role') === 1;
 
         $peminjamans = Peminjaman::with('ruangan')
             ->where('user_id', Auth::id())
@@ -25,20 +27,24 @@ class PeminjamanController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('peminjaman.index', compact('peminjamans', 'status'));
+        return view('peminjaman.index', compact('peminjamans', 'status', 'user', 'isPengelola'));
     }
 
     // GET /peminjaman/tambah : form pengajuan
     public function create(Request $request): View
     {
-        $ruangans = Ruangan::where('status', Ruangan::STATUS_TERSEDIA)
-            ->orderBy('kode_ruang')
-            ->get();
+        $user = Auth::user();
+        $isPengelola = (int) session('user_role') === 1;
 
-        $ruanganDipilih = $request->query('ruangan');
+        // Menangkap parameter ruangan_id yang dikirim dari tombol "Pinjam" di dashboard
+        $ruanganId = $request->query('ruangan_id');
+        
+        // Mengambil data ruangan yang dipilih, atau mengambil data pertama sebagai fallback jika kosong
+        $ruanganDipilih = Ruangan::find($ruanganId) ?? Ruangan::first();
 
-        return view('peminjaman.create', compact('ruangans', 'ruanganDipilih'));
+        return view('peminjaman.create', compact('ruanganDipilih', 'user', 'isPengelola'));
     }
+
     // POST /peminjaman : simpan pengajuan
     public function store(StorePeminjamanRequest $request): RedirectResponse
     {
