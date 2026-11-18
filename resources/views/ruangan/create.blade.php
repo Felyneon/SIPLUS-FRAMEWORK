@@ -1,39 +1,16 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Tambah Ruangan SIPLUS</title>
-</head>
-<body>
-    <h1>Tambah Ruangan Vokasi Baru</h1>
+@extends('layouts.app')
 
-    {{-- Form wajib menggunakan @csrf untuk keamanan di Laravel --}}
-    <form action="/ruangan" method="POST">
+@section('content')
+    <h1 class="text-xl font-semibold mb-4">Tambah Ruangan</h1>
+
+    <form action="{{ route('ruangan.store') }}" method="POST">
         @csrf
-        <div>
-            <label>Nama Ruangan:</label><br>
-            <input type="text" name="nama_ruangan" required>
+
+        @include('ruangan._form')
+
+        <div class="mt-5 flex gap-3">
+            <button type="submit">Simpan Ruangan</button>
+            <a href="{{ route('ruangan.index') }}">Batal</a>
         </div>
-        <br>
-        <div>
-            <label>Kapasitas (Orang):</label><br>
-            <input type="number" name="kapasitas" required>
-        </div>
-        <br>
-        <div>
-            <label>Lokasi Gedung:</label><br>
-            <input type="text" name="lokasi" required>
-        </div>
-        <br>
-        <div>
-            <label>Deskripsi:</label><br>
-            <textarea name="deskripsi"></textarea>
-        </div>
-        <br>
-        <button type="submit">Simpan Ruangan</button>
     </form>
-    
-    <br>
-    <a href="/ruangan">Kembali ke Daftar Ruangan</a>
-</body>
-</html>
+@endsection

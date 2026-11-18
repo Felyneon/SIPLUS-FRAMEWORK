@@ -38,7 +38,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
         // Ruangan: operasi tulis
-        Route::get('/ruangan/tambah', [RuanganController::class, 'create'])->name('ruangan.create');
+        Route::get('/ruangan/create', [RuanganController::class, 'create'])->name('ruangan.create');
         Route::post('/ruangan', [RuanganController::class, 'store'])->name('ruangan.store');
         Route::get('/ruangan/{ruangan}/edit', [RuanganController::class, 'edit'])->name('ruangan.edit');
         Route::put('/ruangan/{ruangan}', [RuanganController::class, 'update'])->name('ruangan.update');
