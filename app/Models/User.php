@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'nim', 'nip'])]
+#[Fillable(['name', 'email', 'password', 'role', 'nim', 'nip', 'profile_photo_path','jenis_identitas',
+'nomor_identitas',])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -31,7 +32,7 @@ class User extends Authenticatable
 
     public function userRole(): HasOne
     {
-        return $this->hasOne(UserRole::class);
+        return $this->hasOne(UserRole::class, 'user_id', 'id');
     }
 
     public function peminjaman(): HasMany
@@ -41,7 +42,7 @@ class User extends Authenticatable
 
     public function roleId(): ?int
     {
-        $roleId = UserRole::where('user_id', $this->id)->value('role_id');
+        $roleId = $this->userRole()->value('role_id');
 
         if ($roleId) {
             return (int) $roleId;

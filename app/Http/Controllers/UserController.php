@@ -9,6 +9,7 @@ use App\Models\UserRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -44,9 +45,28 @@ class UserController extends Controller
         }
 
         $roleId = (int) $request->validated('role_id');
+        $roleSaatIni = $user->roleId();
 
-        UserRole::updateOrCreate(['user_id' => $user->id], ['role_id' => $roleId]);
-        $user->update(['role' => $roleId === Role::PENGELOLA ? 'pengelola' : 'mahasiswa']);
+        // Jangan sampai perubahan ini menghilangkan satu-satunya akun pengelola.
+        if (
+            $roleSaatIni === Role::PENGELOLA
+            && $roleId !== Role::PENGELOLA
+            && UserRole::where('role_id', Role::PENGELOLA)->count() <= 1
+        ) {
+            return back()->with('error', 'Minimal harus ada satu akun pengelola aktif.');
+        }
+
+        DB::transaction(function () use ($user, $roleId) {
+            UserRole::updateOrCreate(
+                ['user_id' => $user->id],
+                ['role_id' => $roleId]
+            );
+
+            // Kolom role dipertahankan untuk kompatibilitas akun lama.
+            $user->update([
+                'role' => $roleId === Role::PENGELOLA ? 'pengelola' : 'mahasiswa',
+            ]);
+        });
 
         return back()->with('success', "Peran {$user->name} berhasil diubah.");
     }

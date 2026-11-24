@@ -16,11 +16,8 @@ class isAdministrator
             return redirect()->route('login');
         }
 
-        if ((int) session('user_role') === Role::PENGELOLA) {
-            return $next($request);
-        }
+        abort_unless((int) session('user_role') === Role::PENGELOLA, 403, 'Akses ditolak.');
 
-        return redirect()->route('dashboard')
-            ->with('error', 'Akses ditolak. Anda tidak memiliki izin.');
+        return $next($request);
     }
 }
