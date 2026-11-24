@@ -14,10 +14,11 @@ use Illuminate\View\View;
 
 class PeminjamanController extends Controller
 {
-    // GET /peminjaman : riwayat milik pengguna yang login
     public function index(Request $request): View
     {
         $status = $this->statusFilter($request);
+        $user = Auth::user();
+        $isPengelola = (int) session('user_role') === 1;
 
         $peminjamans = Peminjaman::with('ruangan')
             ->where('user_id', Auth::id())
@@ -26,21 +27,19 @@ class PeminjamanController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('peminjaman.index', compact('peminjamans', 'status'));
+        return view('peminjaman.index', compact('peminjamans', 'status', 'user', 'isPengelola'));
     }
 
-    // GET /peminjaman/tambah : form pengajuan
     public function create(Request $request): View
     {
-        $ruangans = Ruangan::where('status', Ruangan::STATUS_TERSEDIA)
-            ->orderBy('kode_ruang')
-            ->get();
+        $user = Auth::user();
+        $isPengelola = (int) session('user_role') === 1;
+        $ruanganId = $request->query('ruangan_id');
+        $ruanganDipilih = Ruangan::find($ruanganId) ?? Ruangan::first();
 
-        $ruanganDipilih = $request->query('ruangan');
-
-        return view('peminjaman.create', compact('ruangans', 'ruanganDipilih'));
+        return view('peminjaman.create', compact('ruanganDipilih', 'user', 'isPengelola'));
     }
-    // POST /peminjaman : simpan pengajuan
+
     public function store(StorePeminjamanRequest $request): RedirectResponse
     {
         $data = $request->validated();
@@ -85,7 +84,6 @@ class PeminjamanController extends Controller
             ->with('success', 'Pengajuan peminjaman ruangan berhasil dikirim!');
     }
 
-    // DELETE /peminjaman/{peminjaman} : membatalkan pengajuan milik sendiri
     public function destroy(Peminjaman $peminjaman): RedirectResponse
     {
         abort_unless((int) $peminjaman->user_id === (int) Auth::id(), 403);
@@ -113,14 +111,13 @@ class PeminjamanController extends Controller
         return back()->with('success', 'Pengajuan berhasil dibatalkan.');
     }
 
-    // GET /admin/peminjaman : seluruh pengajuan (pengelola)
     public function adminIndex(Request $request): View
     {
         $status = $this->statusFilter($request);
 
         $peminjamans = Peminjaman::with(['user', 'ruangan'])
             ->when($status, fn ($query) => $query->where('status', $status))
-            ->orderByRaw("CASE status WHEN 'Pending' THEN 0 ELSE 1 END")   // Pending paling atas
+            ->orderByRaw("CASE status WHEN 'Pending' THEN 0 ELSE 1 END")
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -132,7 +129,6 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.index', compact('peminjamans', 'status', 'ringkasan'));
     }
 
-    // POST /admin/peminjaman/{peminjaman}/status : setuju atau tolak (pengelola)
     public function updateStatus(UpdateStatusPeminjamanRequest $request, Peminjaman $peminjaman): RedirectResponse
     {
         $status = $request->validated('status');
@@ -189,7 +185,6 @@ class PeminjamanController extends Controller
         return back()->with('success', "Pengajuan berhasil diubah menjadi {$status}.");
     }
 
-    // Filter ?status=... hanya diterima bila termasuk daftar status yang sah
     private function statusFilter(Request $request): ?string
     {
         $status = strtolower(trim((string) $request->query('status')));

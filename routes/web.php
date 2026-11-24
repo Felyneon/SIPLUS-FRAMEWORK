@@ -33,9 +33,20 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:1,2')->group(function () {
         Route::get('/ruangan', [RuanganController::class, 'index'])->name('ruangan.index');
 
+        // Status Peminjaman & Riwayat
         Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
+        
+        // Form Pengajuan Peminjaman Baru (Create)
         Route::get('/peminjaman/tambah', [PeminjamanController::class, 'create'])->name('peminjaman.create');
         Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
+        
+        // Halaman Detail / Penentuan Jam Pinjam (Full Frame)
+        Route::get('/peminjaman/detail', function () {
+            $user = auth()->user();
+            $isPengelola = (int) session('user_role') === 1;
+            return view('peminjaman.detail', compact('user', 'isPengelola'));
+        })->name('peminjaman.detail');
+
         Route::delete('/peminjaman/{peminjaman}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
     });
 

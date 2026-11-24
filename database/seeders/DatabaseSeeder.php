@@ -12,5 +12,10 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             RuanganSeeder::class,
         ]);
+
+
+        $this->call([
+                RoleSeeder::class,
+            ]);
     }
 }
