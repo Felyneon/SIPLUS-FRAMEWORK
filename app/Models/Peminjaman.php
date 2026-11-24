@@ -21,8 +21,8 @@ class Peminjaman extends Model
     ];
 
     protected $fillable = [
-        'user_id', 'ruangan_id', 'tanggal_mulai', 'tanggal_selesai',
-        'keperluan', 'status', 'alasan_penolakan',
+        'user_id', 'ruangan_id', 'nama_matkul', 'dosen_pengampu', 'prodi',
+        'tanggal_mulai', 'tanggal_selesai', 'keperluan', 'status', 'alasan_penolakan',
     ];
 
     protected function casts(): array

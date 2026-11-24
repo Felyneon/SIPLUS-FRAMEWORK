@@ -20,8 +20,9 @@ class CheckRole
         }
 
         $role = (string) session('user_role');
+        $allowedRoles = array_map('strval', $roles);
 
-        if (in_array($role, $roles, true)) {
+        if ($role !== '' && in_array($role, $allowedRoles, true)) {
             return $next($request);
         }
 

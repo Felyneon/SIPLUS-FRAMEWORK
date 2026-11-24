@@ -9,6 +9,7 @@ use App\Models\Ruangan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PeminjamanController extends Controller
@@ -41,11 +42,43 @@ class PeminjamanController extends Controller
 
     public function store(StorePeminjamanRequest $request): RedirectResponse
     {
-        Peminjaman::create([
-            ...$request->validated(),
-            'user_id' => Auth::id(),
-            'status'  => 'Pending', 
-        ]);
+        $data = $request->validated();
+
+        $tersimpan = DB::transaction(function () use ($data) {
+            // Mengunci baris ruangan agar perubahan status/jadwal tidak saling menimpa.
+            $ruangan = Ruangan::whereKey($data['ruangan_id'])->lockForUpdate()->first();
+
+            if (! $ruangan || $ruangan->status !== Ruangan::STATUS_TERSEDIA) {
+                return false;
+            }
+
+            $mulai = $data['tanggal_mulai'];
+            $selesai = $data['tanggal_selesai'];
+
+            $bentrok = Peminjaman::where('ruangan_id', $ruangan->id)
+                ->where('status', Peminjaman::STATUS_DISETUJUI)
+                ->where('tanggal_mulai', '<', $selesai)
+                ->where('tanggal_selesai', '>', $mulai)
+                ->exists();
+
+            if ($bentrok) {
+                return false;
+            }
+
+            Peminjaman::create([
+                ...$data,
+                'user_id' => Auth::id(),
+                'status'  => Peminjaman::STATUS_PENDING,
+            ]);
+
+            return true;
+        });
+
+        if (! $tersimpan) {
+            return back()->withInput()->withErrors([
+                'ruangan_id' => 'Ruangan sudah tidak tersedia atau jadwalnya telah terisi.',
+            ]);
+        }
 
         return redirect()->route('peminjaman.index')
             ->with('success', 'Pengajuan peminjaman ruangan berhasil dikirim!');
@@ -55,11 +88,25 @@ class PeminjamanController extends Controller
     {
         abort_unless((int) $peminjaman->user_id === (int) Auth::id(), 403);
 
-        if ($peminjaman->status !== 'Pending') {
+        $dibatalkan = DB::transaction(function () use ($peminjaman) {
+            $pengajuan = Peminjaman::whereKey($peminjaman->id)->lockForUpdate()->firstOrFail();
+
+            if ((int) $pengajuan->user_id !== (int) Auth::id()) {
+                abort(403);
+            }
+
+            if ($pengajuan->status !== Peminjaman::STATUS_PENDING) {
+                return false;
+            }
+
+            $pengajuan->delete();
+
+            return true;
+        });
+
+        if (! $dibatalkan) {
             return back()->with('error', 'Hanya pengajuan berstatus Pending yang dapat dibatalkan.');
         }
-
-        $peminjaman->delete();
 
         return back()->with('success', 'Pengajuan berhasil dibatalkan.');
     }
@@ -86,20 +133,67 @@ class PeminjamanController extends Controller
     {
         $status = $request->validated('status');
 
-        $peminjaman->update([
-            'status'           => $status,
-            'alasan_penolakan' => $status === Peminjaman::STATUS_DITOLAK
-                ? $request->validated('alasan_penolakan')
-                : null,
-        ]);
+        $hasil = DB::transaction(function () use ($peminjaman, $status, $request) {
+            // Kunci ruangan terlebih dahulu agar dua persetujuan untuk ruang yang sama terserialisasi.
+            $ruangan = Ruangan::whereKey($peminjaman->ruangan_id)->lockForUpdate()->first();
+
+            $pengajuan = Peminjaman::whereKey($peminjaman->id)->lockForUpdate()->firstOrFail();
+
+            if ($pengajuan->status !== Peminjaman::STATUS_PENDING) {
+                return 'processed';
+            }
+
+            if ($status === Peminjaman::STATUS_DISETUJUI) {
+                if (! $ruangan || $ruangan->status !== Ruangan::STATUS_TERSEDIA) {
+                    return 'unavailable';
+                }
+
+                $bentrok = Peminjaman::where('ruangan_id', $pengajuan->ruangan_id)
+                    ->where('status', Peminjaman::STATUS_DISETUJUI)
+                    ->where('id', '!=', $pengajuan->id)
+                    ->where('tanggal_mulai', '<', $pengajuan->tanggal_selesai)
+                    ->where('tanggal_selesai', '>', $pengajuan->tanggal_mulai)
+                    ->exists();
+
+                if ($bentrok) {
+                    return 'conflict';
+                }
+            }
+
+            $pengajuan->update([
+                'status' => $status,
+                'alasan_penolakan' => $status === Peminjaman::STATUS_DITOLAK
+                    ? $request->validated('alasan_penolakan')
+                    : null,
+            ]);
+
+            return 'updated';
+        });
+
+        if ($hasil === 'processed') {
+            return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
+
+        if ($hasil === 'conflict') {
+            return back()->with('error', 'Jadwal bentrok dengan peminjaman lain yang sudah disetujui.');
+        }
+
+        if ($hasil === 'unavailable') {
+            return back()->with('error', 'Ruangan sedang tidak tersedia sehingga pengajuan tidak dapat disetujui.');
+        }
 
         return back()->with('success', "Pengajuan berhasil diubah menjadi {$status}.");
     }
 
     private function statusFilter(Request $request): ?string
     {
-        $status = $request->query('status');
+        $status = strtolower(trim((string) $request->query('status')));
 
-        return in_array($status, Peminjaman::STATUS, true) ? $status : null;
+        return match ($status) {
+            'pending', 'menunggu' => Peminjaman::STATUS_PENDING,
+            'disetujui' => Peminjaman::STATUS_DISETUJUI,
+            'ditolak' => Peminjaman::STATUS_DITOLAK,
+            default => null,
+        };
     }
 }
