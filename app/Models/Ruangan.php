@@ -2,11 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ruangan extends Model
 {
     protected $table = 'ruangans';
+
+    public const STATUS_TERSEDIA     = 'tersedia';
+    public const STATUS_PEMELIHARAAN = 'pemeliharaan';
+
+    public const STATUS = [
+        self::STATUS_TERSEDIA     => 'Tersedia / Aktif',
+        self::STATUS_PEMELIHARAAN => 'Pemeliharaan',
+    ];
 
     protected $fillable = [
         'kode_ruang',
@@ -17,10 +27,10 @@ class Ruangan extends Model
         'status',
     ];
 
-    public const STATUS = [
-        'tersedia' => 'Tersedia / Aktif',
-        'pemeliharaan' => 'Pemeliharaan',
-    ];
+    public function peminjaman(): HasMany
+    {
+        return $this->hasMany(Peminjaman::class, 'ruangan_id');
+    }
 
     public function getStatusLabelAttribute(): string
     {
