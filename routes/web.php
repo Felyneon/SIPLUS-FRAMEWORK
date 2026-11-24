@@ -71,4 +71,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/pengguna', [UserController::class, 'index'])->name('admin.pengguna.index');
         Route::patch('/admin/pengguna/{user}/role', [UserController::class, 'updateRole'])->name('admin.pengguna.role');
     });
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/kelola', [ProfileController::class, 'kelola'])->name('profile.kelola');
+    Route::match(['put', 'patch'], '/profile', [ProfileController::class, 'update'])->name('profile.update');
+});
 });

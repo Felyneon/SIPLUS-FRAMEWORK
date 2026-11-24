@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajukan Peminjaman - SIPLUS Vokasi UNAIR</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; }</style>
@@ -12,7 +11,7 @@
 <body class="bg-gray-100 flex h-screen overflow-hidden">
 
     <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between hidden md:flex">
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between hidden md:flex shrink-0">
         <div>
             <!-- Logo & Brand -->
             <div class="p-6 pb-4">
@@ -28,7 +27,7 @@
                 </div>
             </div>
 
-            <!-- Menu Navigasi (Konsisten & Beranda Menyala) -->
+            <!-- Menu Navigasi -->
             <div class="px-4 py-2">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">MENU UTAMA</p>
                 <nav class="space-y-1">
@@ -36,7 +35,7 @@
                         <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         Beranda
                     </a>
-                    
+
                     <a href="{{ route('peminjaman.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition">
                         <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                         Status Peminjaman
@@ -48,14 +47,6 @@
                             Ruangan
                         </div>
                         <span class="text-[10px] bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded font-bold">Kelas</span>
-                    </a>
-
-                    <a href="{{ url('/dashboard') }}" class="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg>
-                            Ruang Aula
-                        </div>
-                        <span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">SOON</span>
                     </a>
 
                     @if(isset($isPengelola) && $isPengelola)
@@ -77,7 +68,7 @@
                     </div>
                     <div class="ml-3 min-w-0">
                         <p class="text-xs font-bold text-gray-900 truncate">{{ $user->nama ?? $user->name ?? 'Guest' }}</p>
-                        <p class="text-[10px] text-gray-500 capitalize truncate">{{ $isPengelola ? 'Pengelola / Admin' : 'Mahasiswa' }}</p>
+                        <p class="text-[10px] text-gray-500 capitalize truncate">{{ ($isPengelola ?? false) ? 'Pengelola / Admin' : 'Mahasiswa' }}</p>
                     </div>
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="m-0 w-full">
@@ -92,15 +83,15 @@
     </aside>
 
     <!-- KONTEN UTAMA -->
-    <main class="flex-1 flex flex-col overflow-y-auto">
+    <main class="flex-1 flex flex-col overflow-y-auto min-w-0">
         <div class="bg-white px-8 py-3 border-b border-gray-200 text-xs text-gray-500 flex items-center space-x-2">
             <span class="text-blue-600 font-medium">SIPLUS</span>
-            <span>›</span>
+            <span>&rsaquo;</span>
             <span class="text-gray-700 font-medium">Pengajuan Pinjam Ruangan</span>
         </div>
 
         <div class="p-8 max-w-7xl w-full mx-auto space-y-6">
-            
+
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Pengajuan Pinjam Ruangan</h2>
@@ -108,43 +99,53 @@
                 </div>
                 <div class="bg-blue-100 text-blue-800 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 shadow-sm w-fit">
                     <span class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[11px]">1</span>
-                    <span>Pengajuan & Verifikasi</span>
+                    <span>Pengajuan &amp; Verifikasi</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+
                 <!-- KOLOM KIRI (Formulir Pengajuan) -->
                 <div class="lg:col-span-2">
                     <form action="{{ route('peminjaman.store') }}" method="POST" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
                         @csrf
 
+                        @if ($errors->any())
+                            <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-xs space-y-1">
+                                <p class="font-bold">Pengajuan belum dapat diproses:</p>
+                                <ul class="list-disc pl-4 space-y-0.5">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <!-- Section 1: Informasi Akademik -->
                         <div class="space-y-4">
                             <div class="flex items-center space-x-2 text-xs font-bold text-gray-800 border-b border-gray-100 pb-2">
                                 <span class="w-6 h-6 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">1</span>
-                                <span>Informasi Akademik & Mata Kuliah</span>
+                                <span>Informasi Akademik &amp; Mata Kuliah</span>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Nama Mata Kuliah</label>
-                                    <input type="text" name="nama_mata_kuliah" placeholder="Misal: Aljabar Linear" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                    <input type="text" name="nama_matkul" value="{{ old('nama_matkul') }}" placeholder="Misal: Aljabar Linear" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Dosen Pengampu</label>
-                                    <input type="text" name="dosen_pengampu" placeholder="Nama dosen beserta gelar" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                    <input type="text" name="dosen_pengampu" value="{{ old('dosen_pengampu') }}" placeholder="Nama dosen beserta gelar" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama PJMK / Pemohon & NIM</label>
-                                    <input type="text" name="nama_pjmk" value="{{ $user->nama ?? $user->name ?? '' }} - {{ $user->nim ?? '434251030' }}" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama PJMK / Pemohon &amp; NIM</label>
+                                    <input type="text" name="nama_pjmk" value="{{ old('nama_pjmk', ($user->nama ?? $user->name ?? '') . ' - ' . ($user->nim ?? '434251030')) }}" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Program Studi</label>
-                                    <select name="program_studi" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
-                                        <option value="D4 Teknologi Informasi (TI-B1)">D4 Teknologi Informasi (TI-B1)</option>
-                                        <option value="D3 Sistem Informasi">D3 Sistem Informasi</option>
-                                        <option value="D3 Teknik Otomasi">D3 Teknik Otomasi</option>
+                                    <select name="prodi" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                        <option value="D4 Teknologi Informasi (TI-B1)" {{ old('prodi') === 'D4 Teknologi Informasi (TI-B1)' ? 'selected' : '' }}>D4 Teknik Informatika</option>
+                                        <option value="D3 Sistem Informasi" {{ old('prodi') === 'D3 Sistem Informasi' ? 'selected' : '' }}>D3 Sistem Informasi</option>
                                     </select>
                                 </div>
                             </div>
@@ -154,29 +155,37 @@
                         <div class="space-y-4 pt-2">
                             <div class="flex items-center space-x-2 text-xs font-bold text-gray-800 border-b border-gray-100 pb-2">
                                 <span class="w-6 h-6 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">2</span>
-                                <span>Kebutuhan Ruang & Waktu Kuliah Pengganti (PHL)</span>
+                                <span>Kebutuhan Ruang &amp; Waktu Kuliah Pengganti (PHL)</span>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Pilihan Ruangan (Terkunci)</label>
-                                    <!-- Input hidden agar ID ruangan tetap terkirim ke database -->
-                                    <input type="hidden" name="ruangan_id" value="{{ $ruanganDipilih->id ?? '' }}">
-                                    
+                                    <input type="hidden" name="ruangan_id" value="{{ old('ruangan_id', $ruanganDipilih->id ?? '') }}">
                                     <div class="w-full px-3 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 flex items-center justify-between">
                                         <span>{{ $ruanganDipilih->kode_ruang ?? '-' }} - {{ $ruanganDipilih->nama_ruang ?? 'Ruang Kuliah' }}</span>
-                                        <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">Terkunci</span>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1">Tanggal Pelaksanaan PHL</label>
-                                    <input type="date" name="tanggal" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                    <input type="date" name="tanggal" value="{{ old('tanggal') }}" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Waktu Mulai</label>
+                                    <input type="time" name="waktu_mulai" value="{{ old('waktu_mulai') }}" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Waktu Selesai</label>
+                                    <input type="time" name="waktu_selesai" value="{{ old('waktu_selesai') }}" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Alasan / Keterangan Kuliah Pengganti</label>
-                                <textarea name="alasan" rows="3" placeholder="Misal: Kuliah pengganti pertemuan ke-7 yang tertunda karena agenda seminar nasional dosen..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500"></textarea>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Keperluan / Keterangan Kuliah Pengganti</label>
+                                <textarea name="keperluan" rows="3" minlength="5" required placeholder="Misal: Kuliah pengganti pertemuan ke-7 yang tertunda karena agenda seminar nasional dosen..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">{{ old('keperluan') }}</textarea>
                             </div>
                         </div>
 
@@ -187,7 +196,7 @@
                                 Alur Proses Pengajuan Kuliah Pengganti:
                             </p>
                             <p class="text-gray-600 leading-relaxed pl-5">
-                                Setelah formulir diajukan, staf Sarpras akan memverifikasi permohonan Anda (Status: <span class="text-amber-600 font-bold">Menunggu</span> → <span class="text-emerald-600 font-bold">Disetujui</span>/<span class="text-red-600 font-bold">Ditolak</span>). Jika disetujui, Anda dapat langsung menentukan blok sesi jam pinjam di halaman Status Permohonan.
+                                Setelah formulir diajukan, staf Sarpras akan memverifikasi permohonan Anda (Status: <span class="text-amber-600 font-bold">Menunggu</span> &rarr; <span class="text-emerald-600 font-bold">Disetujui</span>/<span class="text-red-600 font-bold">Ditolak</span>). Jika disetujui, Anda dapat langsung menentukan blok sesi jam pinjam di halaman Status Permohonan.
                             </p>
                         </div>
 
