@@ -35,7 +35,9 @@
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">MENU UTAMA</p>
                 <nav class="space-y-1">
                     <a href="{{ url('/dashboard') }}" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition">
-                        <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
                         Beranda
                     </a>
                     <a href="{{ url('/admin/peminjaman') }}" class="flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 transition">
@@ -79,13 +81,24 @@
 
         <!-- Bagian Isi Utama / Form -->
         <div class="p-8 max-w-5xl w-full mx-auto">
-            
+
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
                     <span class="text-blue-600">➕</span> Tambah Ruangan Baru
                 </h2>
                 <p class="text-xs text-gray-500 mt-0.5">Masukkan data inventaris ruang kuliah atau laboratorium Kampus B (Gedung A, B, C).</p>
             </div>
+
+            @if ($errors->any())
+                <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">
+                    <p class="font-bold mb-1">Periksa kembali data yang diinput:</p>
+                    <ul class="list-disc pl-4 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <form action="{{ route('ruangan.store') }}" method="POST" class="space-y-6">
                 @csrf
@@ -99,15 +112,15 @@
                     <p class="text-xs text-gray-500 mb-6">Lengkapi lokasi fisik, kode identifikasi unik, serta spesifikasi kapasitas ruangan.</p>
 
                     <div class="space-y-4">
-                        <!-- Gedung -->
+                        <!-- Lokasi / Gedung -->
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Gedung</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Lokasi / Gedung</label>
                             <div class="relative">
-                                <select name="gedung" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:border-blue-500 appearance-none shadow-sm">
-                                    <option value="" disabled selected>Pilih Gedung Kampus B</option>
-                                    <option value="Gedung A">Gedung A</option>
-                                    <option value="Gedung B">Gedung B</option>
-                                    <option value="Gedung C">Gedung C</option>
+                                <select name="lokasi" required class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:border-blue-500 appearance-none shadow-sm">
+                                    <option value="" disabled {{ old('lokasi') ? '' : 'selected' }}>Pilih Gedung Kampus B</option>
+                                    <option value="Gedung A" {{ old('lokasi') === 'Gedung A' ? 'selected' : '' }}>Gedung A</option>
+                                    <option value="Gedung B" {{ old('lokasi') === 'Gedung B' ? 'selected' : '' }}>Gedung B</option>
+                                    <option value="Gedung C" {{ old('lokasi') === 'Gedung C' ? 'selected' : '' }}>Gedung C</option>
                                 </select>
                                 <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-400">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -118,19 +131,25 @@
                         <!-- Kode Ruangan -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1.5">Kode Ruangan</label>
-                            <input type="text" name="kode_ruang" placeholder="Contoh: GA-101" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm">
+                            <input type="text" name="kode_ruang" value="{{ old('kode_ruang') }}" required placeholder="Contoh: GA-101" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm">
                         </div>
 
                         <!-- Nama Ruangan -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1.5">Nama Ruangan</label>
-                            <input type="text" name="nama_ruangan" placeholder="Contoh: Ruang Teori Kuliah 1A" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm">
+                            <input type="text" name="nama_ruangan" value="{{ old('nama_ruangan') }}" required placeholder="Contoh: Ruang Teori Kuliah 1A" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm">
                         </div>
 
                         <!-- Kapasitas Ruangan -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1.5">Kapasitas (Jumlah Kursi)</label>
-                            <input type="number" name="kapasitas" placeholder="Contoh: 40" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm">
+                            <input type="number" name="kapasitas" value="{{ old('kapasitas') }}" min="1" max="5000" required placeholder="Contoh: 40" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm">
+                        </div>
+
+                        <!-- Deskripsi -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Deskripsi / Fasilitas</label>
+                            <textarea name="deskripsi" rows="3" placeholder="Contoh: AC, Proyektor HDMI, Papan Tulis" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm">{{ old('deskripsi') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -147,7 +166,7 @@
                         <!-- Opsi 1: Tersedia -->
                         <label class="relative flex items-start p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition bg-white shadow-sm">
                             <div class="flex items-center h-5">
-                                <input type="radio" name="status" value="aktif" checked class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                <input type="radio" name="status" value="tersedia" {{ old('status', 'tersedia') === 'tersedia' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                             </div>
                             <div class="ml-3 text-xs">
                                 <span class="font-bold text-gray-900 flex items-center">
@@ -160,7 +179,7 @@
                         <!-- Opsi 2: Pemeliharaan -->
                         <label class="relative flex items-start p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-rose-500 transition bg-white shadow-sm">
                             <div class="flex items-center h-5">
-                                <input type="radio" name="status" value="pemeliharaan" class="h-4 w-4 text-rose-600 border-gray-300 focus:ring-rose-500">
+                                <input type="radio" name="status" value="pemeliharaan" {{ old('status') === 'pemeliharaan' ? 'checked' : '' }} class="h-4 w-4 text-rose-600 border-gray-300 focus:ring-rose-500">
                             </div>
                             <div class="ml-3 text-xs">
                                 <span class="font-bold text-gray-900 flex items-center">

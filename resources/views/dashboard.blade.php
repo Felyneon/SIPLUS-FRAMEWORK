@@ -102,20 +102,28 @@
             </div>
 
             <!-- SEARCH & FILTER -->
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="relative w-full md:w-96">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </span>
-                    <input type="text" placeholder="Cari ruang kelas, auditorium, kapasitas atau lantai..." class="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm">
-                </div>
-                <div class="flex items-center space-x-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-                    <button class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold shadow-sm">Semua</button>
-                    <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg text-xs font-medium">Gedung A</button>
-                    <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg text-xs font-medium">Gedung B</button>
-                    <button class="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg text-xs font-medium">Gedung C</button>
-                </div>
-            </div>
+            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+    <div class="relative w-full md:w-96">
+        <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </span>
+        <input
+            id="searchRuangan"
+            type="text"
+            placeholder="Cari ruang kelas, auditorium, kapasitas atau lantai..."
+            class="w-full h-10 pl-10 pr-4 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 shadow-sm transition"
+        >
+    </div>
+
+    <div id="filterGedungGroup" class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 shrink-0">
+        <button type="button" data-gedung="Semua" class="filter-btn whitespace-nowrap px-4 h-10 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-sm cursor-pointer transition">Semua</button>
+        <button type="button" data-gedung="Gedung A" class="filter-btn whitespace-nowrap px-4 h-10 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-xs font-medium cursor-pointer transition">Gedung A</button>
+        <button type="button" data-gedung="Gedung B" class="filter-btn whitespace-nowrap px-4 h-10 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-xs font-medium cursor-pointer transition">Gedung B</button>
+        <button type="button" data-gedung="Gedung C" class="filter-btn whitespace-nowrap px-4 h-10 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-xs font-medium cursor-pointer transition">Gedung C</button>
+    </div>
+</div>
 
             <!-- SECTION: RUANG AULA UTAMA VOKASI -->
             <div>
@@ -124,13 +132,12 @@
                         <h3 class="font-bold text-gray-900 text-sm">Ruang Aula Utama Vokasi (Gedung A, B & C)</h3>
                         <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Pilihan Utama</span>
                     </div>
-                    <a href="#" class="text-xs font-bold text-blue-600 hover:underline">Lihat Semua Aula ›</a>
+                <a href="{{ url('/ruangan?q=Aula') }}" class="text-xs font-bold text-blue-600 hover:underline">Lihat Semua Aula ›</a>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Aula 1 -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:border-blue-300 transition flex flex-col justify-between">
-                        <div>
+                        <div data-gedung="Gedung A" class="ruangan-card bg-white border border-gray-200 rounded-xl p-5 ...">                        <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">GEDUNG A</span>
                                 <span class="text-[11px] font-bold text-emerald-600 flex items-center"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5"></span> Tersedia</span>
@@ -145,8 +152,7 @@
                     </div>
 
                     <!-- Aula 2 -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:border-blue-300 transition flex flex-col justify-between">
-                        <div>
+                        <div data-gedung="Gedung B" class="ruangan-card bg-white border border-gray-200 rounded-xl p-5 ...">                        <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">GEDUNG B</span>
                                 <span class="text-[11px] font-bold text-emerald-600 flex items-center"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5"></span> Tersedia</span>
@@ -161,7 +167,7 @@
                     </div>
 
                     <!-- Aula 3 -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:border-blue-300 transition flex flex-col justify-between">
+                    <div data-gedung="Gedung C" class="ruangan-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:border-blue-300 transition flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">GEDUNG C</span>
@@ -170,4 +176,190 @@
                             <h4 class="font-bold text-gray-900 text-sm mb-1">Hall & Mini Amphitheater</h4>
                             <p class="text-[11px] text-gray-500 leading-relaxed mb-4">Kapasitas 120 Kursi • Tiered Seating • Smart Interactive Board • Surround Audio</p>
                         </div>
-                        <a href="{{ url('/ruangan') }}" class="w-full py-2 bg-blue-600 hover:bg-blue
+                        <a href="{{ url('/peminjaman/tambah') }}" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold text-center transition flex items-center justify-center space-x-1">
+                            <span>Pinjam Ruang Aula</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: REKOMENDASI RUANG KELAS KULIAH TEORI -->
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-bold text-gray-900 text-sm">Rekomendasi Ruang Kelas Kuliah Teori</h3>
+                    <span class="text-[11px] text-gray-400 font-medium">Pembaruan Real-Time</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div data-gedung="Gedung A" class="ruangan-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">GEDUNG A</span>
+                                <span class="text-[11px] font-bold text-emerald-600">🟢 10 Tersedia</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-sm mb-1">Ruang Kelas Teori</h4>
+                            <p class="text-[11px] text-gray-500 leading-relaxed mb-4">Standard room AC, Projector HDMI, 40–50 mhs</p>
+                        </div>
+                        <a href="{{ url('/peminjaman/tambah') }}" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold text-center transition flex items-center justify-center space-x-1">
+                            <span>Pinjam Ruang</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+
+                    <div data-gedung="Gedung B" class="ruangan-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">GEDUNG B</span>
+                                <span class="text-[11px] font-bold text-emerald-600">🟢 6 Tersedia</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-sm mb-1">Ruang Kelas Teori</h4>
+                            <p class="text-[11px] text-gray-500 leading-relaxed mb-4">Smart screen & sound interaktif dosen & mahasiswa</p>
+                        </div>
+                        <a href="{{ url('/peminjaman/tambah') }}" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold text-center transition flex items-center justify-center space-x-1">
+                            <span>Pinjam Ruang</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+
+                    <div data-gedung="Gedung C" class="ruangan-card bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">GEDUNG C</span>
+                                <span class="text-[11px] font-bold text-emerald-600">🟢 3 Tersedia</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-sm mb-1">Ruang Kelas Teori</h4>
+                            <p class="text-[11px] text-gray-500 leading-relaxed mb-4">Format U-Shape & seminar kecil tingkat akhir</p>
+                        </div>
+                        <a href="{{ url('/peminjaman/tambah') }}" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold text-center transition flex items-center justify-center space-x-1">
+                            <span>Pinjam Ruang</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <p id="emptyFilterMsg" class="hidden text-center text-xs text-gray-500 bg-white border border-gray-200 rounded-xl py-6">
+                Tidak ada ruangan yang cocok dengan kata kunci atau gedung yang dipilih.
+            </p>
+
+            <!-- SECTION: STATUS TERKINI PERMOHONAN ANDA -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm">Status Terkini Permohonan Anda</h3>
+                        <p class="text-[11px] text-gray-500">Tracking permohonan peminjaman ruang kelas & aula yang diajukan</p>
+                    </div>
+                    <a href="{{ url('/peminjaman') }}" class="text-xs font-bold text-blue-600 hover:underline">Riwayat Lengkap ›</a>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3.5 bg-gray-50/70 border border-gray-100 rounded-xl text-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold">📚</div>
+                            <div>
+                                <div class="font-bold text-gray-900 flex items-center gap-2">
+                                    Algoritma & Pemrograman <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">GA-201</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-0.5">Jadwal: Senin, 08.00 - 10.30 WIB • Gedung A Lt. 2</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[11px] flex items-center">✓ Disetujui</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3.5 bg-gray-50/70 border border-gray-100 rounded-xl text-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold">🏛️</div>
+                            <div>
+                                <div class="font-bold text-gray-900 flex items-center gap-2">
+                                    Seminar Nasional & Expo Vokasi UNAIR <span class="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold">AU-A301</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-0.5">Jadwal: Sabtu, 08.00 - 16.00 WIB • Aula Utama Vokasi Lt. 3</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[11px] flex items-center">✓ Disetujui</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3.5 bg-gray-50/70 border border-gray-100 rounded-xl text-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold">📊</div>
+                            <div>
+                                <div class="font-bold text-gray-900 flex items-center gap-2">
+                                    Manajemen Keuangan <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">GB-102</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-0.5">Jadwal: Selasa, 10.45 - 13.15 WIB • Gedung B Lt. 1</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-full font-bold text-[11px] flex items-center">⏱ Menunggu</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3.5 bg-gray-50/70 border border-gray-100 rounded-xl text-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold">🔬</div>
+                            <div>
+                                <div class="font-bold text-gray-900 flex items-center gap-2">
+                                    Fisiologi dan Kesehatan Kerja <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">GC-101</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-0.5">Jadwal: Kamis, 13.30 - 15.30 WIB • Gedung C Lt. 1</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-100 rounded-full font-bold text-[11px] flex items-center">✕ Ditolak</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER COPYRIGHT -->
+            <div class="text-center py-4 text-[11px] text-gray-400 border-t border-gray-200">
+                © 2025 SIPLUS - Sistem Informasi Sarana Prasarana Fakultas Vokasi Universitas Airlangga. Hak Cipta Dilindungi.
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchRuangan');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.ruangan-card');
+            const emptyMsg = document.getElementById('emptyFilterMsg');
+            let activeGedung = 'Semua';
+
+            function applyFilter() {
+                const keyword = (searchInput.value || '').toLowerCase().trim();
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    const gedung = card.getAttribute('data-gedung') || '';
+                    const text = card.innerText.toLowerCase();
+
+                    const matchGedung = (activeGedung === 'Semua') || (gedung === activeGedung);
+                    const matchKeyword = (keyword === '') || text.includes(keyword);
+
+                    if (matchGedung && matchKeyword) {
+                        card.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+
+                emptyMsg.classList.toggle('hidden', visibleCount > 0);
+            }
+
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    activeGedung = this.getAttribute('data-gedung');
+
+                    filterButtons.forEach(b => {
+                        b.className = 'filter-btn px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg text-xs font-medium cursor-pointer transition';
+                    });
+
+                    this.className = 'filter-btn px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold shadow-sm cursor-pointer transition';
+                    applyFilter();
+                });
+            });
+
+            searchInput.addEventListener('input', applyFilter);
+        });
+    </script>
+</body>
+</html>
