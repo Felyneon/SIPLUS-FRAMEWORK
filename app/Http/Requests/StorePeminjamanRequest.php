@@ -16,6 +16,39 @@ class StorePeminjamanRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $merge = [];
+
+        if (! $this->filled('nama_matkul') &&$this->filled('nama_mata_kuliah')) {
+            $merge['nama_matkul'] =$this->input('nama_mata_kuliah');
+        }
+
+        if (! $this->filled('prodi') &&$this->filled('program_studi')) {
+            $merge['prodi'] =$this->input('program_studi');
+        }
+
+        if (! $this->filled('tanggal_mulai') &&$this->filled(['tanggal', 'waktu_mulai'])) {
+            try {
+                $merge['tanggal_mulai'] = Carbon::parse($this->input('tanggal') . ' ' .$this->input('waktu_mulai'))->toDateTimeString();
+            } catch (\Throwable) {
+                // Biarkan aturan date menangani format yang tidak valid
+            }
+        }
+
+        if (! $this->filled('tanggal_selesai') &&$this->filled(['tanggal', 'waktu_selesai'])) {
+            try {
+                $merge['tanggal_selesai'] = Carbon::parse($this->input('tanggal') . ' ' .$this->input('waktu_selesai'))->toDateTimeString();
+            } catch (\Throwable) {
+                // Biarkan aturan date menangani format yang tidak valid
+            }
+        }
+
+        if (! empty($merge)) {
+            $this->merge($merge);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -35,10 +68,11 @@ class StorePeminjamanRequest extends FormRequest
         return [
             'ruangan_id.required'          => 'Ruangan wajib dipilih.',
             'ruangan_id.exists'            => 'Ruangan tidak ditemukan atau sedang tidak tersedia.',
-            'nama_matkul.required'        => 'Nama mata kuliah wajib diisi.',
-            'nama_matkul.min'             => 'Nama mata kuliah minimal 3 karakter.',
-            'dosen_pengampu.required'     => 'Nama dosen pengampu wajib diisi.',
-            'prodi.required'              => 'Program studi wajib dipilih.',
+            'nama_matkul.required'         => 'Nama mata kuliah wajib diisi.',
+            'nama_matkul.min'              => 'Nama mata kuliah minimal 3 karakter.',
+            'dosen_pengampu.required'      => 'Nama dosen pengampu wajib diisi.',
+            'dosen_pengampu.min'           => 'Nama dosen pengampu minimal 3 karakter.',
+            'prodi.required'               => 'Program studi wajib dipilih.',
             'tanggal_mulai.required'       => 'Waktu mulai wajib diisi.',
             'tanggal_mulai.date'           => 'Format waktu mulai tidak valid.',
             'tanggal_mulai.after_or_equal' => 'Waktu mulai tidak boleh sebelum sekarang.',
@@ -64,40 +98,35 @@ class StorePeminjamanRequest extends FormRequest
                 $mulai   = Carbon::parse($this->input('tanggal_mulai'));
                 $selesai = Carbon::parse($this->input('tanggal_selesai'));
 
-                if ($mulai->lt(now()->addDay())) {
-                    $validator->errors()->add('tanggal_mulai', 'Pengajuan harus dilakukan minimal 1 hari sebelum waktu peminjaman.');
+                if ($mulai->lt(now()->addDay())) {$validator->errors()->add('tanggal_mulai', 'Pengajuan harus dilakukan minimal 1 hari sebelum waktu peminjaman.');
                     return;
                 }
 
-                if (! $mulai->isSameDay($selesai)) {
-                    $validator->errors()->add('tanggal_selesai', 'Peminjaman harus selesai pada hari yang sama.');
+                if (! $mulai->isSameDay($selesai)) {$validator->errors()->add('tanggal_selesai', 'Peminjaman harus selesai pada hari yang sama.');
                     return;
                 }
 
                 $jam  = config('siplus.jam_layanan');
-                $hari = $mulai->dayOfWeek;
+                $hari =$mulai->dayOfWeek;
 
-                if (! isset($jam[$hari])) {
-                    $validator->errors()->add('tanggal_mulai', 'Layanan peminjaman tutup pada hari tersebut.');
+                if (! isset($jam[$hari])) {$validator->errors()->add('tanggal_mulai', 'Layanan peminjaman tutup pada hari tersebut.');
                     return;
                 }
 
-                [$buka, $tutup] = $jam[$hari];
+                [$buka,$tutup] = $jam[$hari];
 
                 if ($mulai->lt($mulai->copy()->setTimeFromTimeString($buka))
-                    || $selesai->gt($selesai->copy()->setTimeFromTimeString($tutup))) {
-                    $validator->errors()->add('tanggal_mulai', "Peminjaman harus berada dalam jam layanan {$buka} - {$tutup} WIB.");
+                    || $selesai->gt($selesai->copy()->setTimeFromTimeString($tutup))) {$validator->errors()->add('tanggal_mulai', "Peminjaman harus berada dalam jam layanan {$buka} - {$tutup} WIB.");
                     return;
                 }
 
-                $bentrok = Peminjaman::where('ruangan_id', $this->input('ruangan_id'))
+                $bentrok = Peminjaman::where('ruangan_id',$this->input('ruangan_id'))
                     ->where('status', Peminjaman::STATUS_DISETUJUI)
                     ->where('tanggal_mulai', '<', $selesai)
                     ->where('tanggal_selesai', '>', $mulai)
                     ->exists();
 
-                if ($bentrok) {
-                    $validator->errors()->add('ruangan_id', 'Ruangan sudah dipesan pada waktu tersebut.');
+                if ($bentrok) {$validator->errors()->add('ruangan_id', 'Ruangan sudah dipesan pada waktu tersebut.');
                 }
             },
         ];

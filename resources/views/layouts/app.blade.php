@@ -57,14 +57,13 @@
                         <span>Beranda</span>
                     </a>
 
-                    
-<a href="{{ $userIsPengelola ? route('admin.peminjaman.index') : route('peminjaman.index') }}"
-   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition {{ request()->routeIs('peminjaman.index', 'admin.peminjaman.index') ? 'font-semibold text-blue-600 bg-blue-50/80' : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-    <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('peminjaman.index', 'admin.peminjaman.index') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-    </svg>
-    <span>Status Peminjaman</span>
-</a>
+                    <a href="{{ route('peminjaman.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition {{ request()->routeIs('peminjaman.index') ? 'font-semibold text-blue-600 bg-blue-50/80' : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('peminjaman.index') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        <span>Status Peminjaman</span>
+                    </a>
 
                     <a href="{{ route('ruangan.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition {{ request()->routeIs('ruangan.index') ? 'font-semibold text-blue-600 bg-blue-50/80' : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
