@@ -6,6 +6,7 @@ use App\Http\Requests\StorePeminjamanRequest;
 use App\Http\Requests\UpdateStatusPeminjamanRequest;
 use App\Models\Peminjaman;
 use App\Models\Ruangan;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,16 +45,33 @@ class PeminjamanController extends Controller
     {
         $data = $request->validated();
 
-        $tersimpan = DB::transaction(function () use ($data) {
+        $mulai = ! empty($data['tanggal_mulai'])
+            ? Carbon::parse($data['tanggal_mulai'])->toDateTimeString()
+            : Carbon::parse($request->input('tanggal') . ' ' . $request->input('waktu_mulai'))->toDateTimeString();
+
+        $selesai = ! empty($data['tanggal_selesai'])
+            ? Carbon::parse($data['tanggal_selesai'])->toDateTimeString()
+            : Carbon::parse($request->input('tanggal') . ' ' . $request->input('waktu_selesai'))->toDateTimeString();
+
+        $detailTambahan = array_filter([
+            ! empty($data['nama_matkul']) ? 'Matkul: ' . trim((string) $data['nama_matkul']) : null,
+            ! empty($data['dosen_pengampu']) ? 'Dosen: ' . trim((string) $data['dosen_pengampu']) : null,
+            $request->filled('nama_pjmk') ? 'PJMK: ' . trim((string) $request->input('nama_pjmk')) : null,
+            ! empty($data['prodi']) ? 'Prodi: ' . trim((string) $data['prodi']) : null,
+        ]);
+
+        $keperluanDasar = trim((string) ($data['keperluan'] ?? ''));
+        $keperluanFinal = ! empty($detailTambahan)
+            ? $keperluanDasar . ' (' . implode(' | ', $detailTambahan) . ')'
+            : $keperluanDasar;
+
+        $tersimpan = DB::transaction(function () use ($data, $mulai, $selesai, $keperluanFinal) {
             // Mengunci baris ruangan agar perubahan status/jadwal tidak saling menimpa.
             $ruangan = Ruangan::whereKey($data['ruangan_id'])->lockForUpdate()->first();
 
             if (! $ruangan || $ruangan->status !== Ruangan::STATUS_TERSEDIA) {
                 return false;
             }
-
-            $mulai = $data['tanggal_mulai'];
-            $selesai = $data['tanggal_selesai'];
 
             $bentrok = Peminjaman::where('ruangan_id', $ruangan->id)
                 ->where('status', Peminjaman::STATUS_DISETUJUI)
@@ -66,9 +84,13 @@ class PeminjamanController extends Controller
             }
 
             Peminjaman::create([
-                ...$data,
-                'user_id' => Auth::id(),
-                'status'  => Peminjaman::STATUS_PENDING,
+                'user_id'          => Auth::id(),
+                'ruangan_id'       => $ruangan->id,
+                'tanggal_mulai'    => $mulai,
+                'tanggal_selesai'  => $selesai,
+                'keperluan'        => $keperluanFinal,
+                'status'           => Peminjaman::STATUS_PENDING,
+                'alasan_penolakan' => null,
             ]);
 
             return true;
