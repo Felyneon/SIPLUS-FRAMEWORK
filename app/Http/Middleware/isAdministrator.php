@@ -12,12 +12,26 @@ class isAdministrator
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check()) {
-            return redirect()->route('login');
-        }
 
-        abort_unless((int) session('user_role') === Role::PENGELOLA, 403, 'Akses ditolak.');
-
-        return $next($request);
+    // Pastikan pengguna sudah login.
+    if (! Auth::check()) {
+        return redirect()->route('login');
     }
+
+    // Ambil role langsung dari database melalui user yang login.
+    $user = Auth::user();
+    $roleId = (int) $user->roleId();
+
+    // Sinkronkan session dengan role dari database.
+    $request->session()->put('user_role', $roleId);
+
+    // Hanya role Pengelola (1) yang boleh masuk.
+    if ($roleId !== \App\Models\Role::PENGELOLA) {
+        abort(403, 'Akses ditolak. Halaman ini hanya untuk Pengelola.');
+    }
+
+    return $next($request);
 }
+
+}
+

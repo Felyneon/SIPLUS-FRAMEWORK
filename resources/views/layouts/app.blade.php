@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -13,9 +14,13 @@
 <body class="bg-slate-100 text-slate-800 flex h-screen overflow-hidden">
     @php
         $authUser = $user ?? auth()->user();
-        $userIsPengelola = isset($isPengelola) ? (bool) $isPengelola : ((int) session('user_role') === 1);
+        $userIsPengelola = isset($isPengelola)
+            ? (bool) $isPengelola
+            : ((int) session('user_role') === 1);
+
         $displayName = $authUser->nama ?? $authUser->name ?? 'Albrtsbcn1';
         $initial = strtoupper(substr(trim($displayName), 0, 1) ?: 'A');
+
         $profileUrl = \Illuminate\Support\Facades\Route::has('profile.edit')
             ? route('profile.edit')
             : (\Illuminate\Support\Facades\Route::has('profil.index') ? route('profil.index') : url('/profil'));
@@ -49,6 +54,7 @@
                 </div>
 
                 <nav class="space-y-1">
+                    <!-- Menu Beranda -->
                     <a href="{{ url('/dashboard') }}"
                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition {{ request()->is('dashboard') ? 'font-semibold text-blue-600 bg-blue-50/80' : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <svg class="w-5 h-5 shrink-0 {{ request()->is('dashboard') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -57,14 +63,16 @@
                         <span>Beranda</span>
                     </a>
 
-                    <a href="{{ route('peminjaman.index') }}"
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition {{ request()->routeIs('peminjaman.index') ? 'font-semibold text-blue-600 bg-blue-50/80' : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('peminjaman.index') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <!-- Menu Status Peminjaman -->
+                    <a href="{{ $userIsPengelola ? route('admin.peminjaman.index') : route('peminjaman.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition {{ request()->routeIs('peminjaman.index', 'admin.peminjaman.index') ? 'font-semibold text-blue-600 bg-blue-50/80' : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('peminjaman.index', 'admin.peminjaman.index') ? 'text-blue-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
                         <span>Status Peminjaman</span>
                     </a>
 
+                    <!-- Menu Ruangan -->
                     <a href="{{ route('ruangan.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition {{ request()->routeIs('ruangan.index') ? 'font-semibold text-blue-600 bg-blue-50/80' : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <div class="flex items-center gap-3 min-w-0">
