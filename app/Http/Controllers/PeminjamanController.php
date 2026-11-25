@@ -6,7 +6,6 @@ use App\Http\Requests\StorePeminjamanRequest;
 use App\Http\Requests\UpdateStatusPeminjamanRequest;
 use App\Models\Peminjaman;
 use App\Models\Ruangan;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,33 +44,17 @@ class PeminjamanController extends Controller
     {
         $data = $request->validated();
 
-        $mulai = ! empty($data['tanggal_mulai'])
-            ? Carbon::parse($data['tanggal_mulai'])->toDateTimeString()
-            : Carbon::parse($request->input('tanggal') . ' ' . $request->input('waktu_mulai'))->toDateTimeString();
-
-        $selesai = ! empty($data['tanggal_selesai'])
-            ? Carbon::parse($data['tanggal_selesai'])->toDateTimeString()
-            : Carbon::parse($request->input('tanggal') . ' ' . $request->input('waktu_selesai'))->toDateTimeString();
-
-        $detailTambahan = array_filter([
-            ! empty($data['nama_matkul']) ? 'Matkul: ' . trim((string) $data['nama_matkul']) : null,
-            ! empty($data['dosen_pengampu']) ? 'Dosen: ' . trim((string) $data['dosen_pengampu']) : null,
-            $request->filled('nama_pjmk') ? 'PJMK: ' . trim((string) $request->input('nama_pjmk')) : null,
-            ! empty($data['prodi']) ? 'Prodi: ' . trim((string) $data['prodi']) : null,
-        ]);
-
-        $keperluanDasar = trim((string) ($data['keperluan'] ?? ''));
-        $keperluanFinal = ! empty($detailTambahan)
-            ? $keperluanDasar . ' (' . implode(' | ', $detailTambahan) . ')'
-            : $keperluanDasar;
-
-        $tersimpan = DB::transaction(function () use ($data, $mulai, $selesai, $keperluanFinal) {
+        $tersimpan = DB::transaction(function () use ($data) {
             // Mengunci baris ruangan agar perubahan status/jadwal tidak saling menimpa.
             $ruangan = Ruangan::whereKey($data['ruangan_id'])->lockForUpdate()->first();
 
             if (! $ruangan || $ruangan->status !== Ruangan::STATUS_TERSEDIA) {
                 return false;
             }
+
+            $mulai = $data['tanggal_mulai'];
+            $selesai = $data['tanggal_selesai'];
+            $keperluanFinal = $data['keperluan'];
 
             $bentrok = Peminjaman::where('ruangan_id', $ruangan->id)
                 ->where('status', Peminjaman::STATUS_DISETUJUI)
@@ -84,14 +67,23 @@ class PeminjamanController extends Controller
             }
 
             Peminjaman::create([
-                'user_id'          => Auth::id(),
-                'ruangan_id'       => $ruangan->id,
-                'tanggal_mulai'    => $mulai,
-                'tanggal_selesai'  => $selesai,
-                'keperluan'        => $keperluanFinal,
-                'status'           => Peminjaman::STATUS_PENDING,
-                'alasan_penolakan' => null,
-            ]);
+    'user_id'          => Auth::id(),
+    'ruangan_id'       => $ruangan->id,
+
+    // Informasi akademik
+    'nama_matkul'      => $data['nama_matkul'],
+    'dosen_pengampu'   => $data['dosen_pengampu'],
+    'prodi'            => $data['prodi'],
+
+    // Informasi peminjaman
+    'tanggal_mulai'    => $mulai,
+    'tanggal_selesai'  => $selesai,
+    'keperluan'        => $keperluanFinal,
+
+    // Status awal pengajuan
+    'status'           => Peminjaman::STATUS_PENDING,
+    'alasan_penolakan' => null,
+]);
 
             return true;
         });
@@ -138,11 +130,11 @@ class PeminjamanController extends Controller
         $status = $this->statusFilter($request);
 
         $peminjamans = Peminjaman::with(['user', 'ruangan'])
-            ->when($status, fn ($query) => $query->where('status', $status))
-            ->orderByRaw("CASE status WHEN 'Pending' THEN 0 ELSE 1 END")
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+    ->when($status, fn ($query) => $query->where('status', $status))
+    ->orderBy('created_at', 'asc')
+    ->orderBy('id', 'asc')
+    ->paginate(10)
+    ->withQueryString();
 
         $ringkasan = Peminjaman::selectRaw('status, COUNT(*) AS total')
             ->groupBy('status')
