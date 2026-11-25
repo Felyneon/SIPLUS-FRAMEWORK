@@ -27,13 +27,11 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): RedirectResponse
     {
-        // Mengambil email dan password yang sudah divalidasi.
         $credentials = $request->safe()->only([
             'email',
             'password',
         ]);
 
-        // Memeriksa email dan password.
         if (!Auth::attempt(
             $credentials,
             $request->boolean('remember')
@@ -45,13 +43,9 @@ class AuthController extends Controller
                 ->onlyInput('email');
         }
 
-        // Memperbarui session setelah login berhasil.
         $request->session()->regenerate();
 
-        // Mengambil pengguna yang berhasil login.
         $user = Auth::user();
-
-        // Mengambil role pengguna dari relasi user_roles.
         $roleId = $user->roleId();
 
         // Memastikan pengguna mempunyai role yang valid.
@@ -95,53 +89,43 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request): RedirectResponse
     {
-        // Mengambil data yang sudah lolos validasi.
         $data = $request->safe()->only([
             'name',
             'email',
             'password',
             'role',
-            'jenis_identitas',
-            'nomor_identitas',
+            'nim',
+            'nip',
         ]);
 
-        // Menentukan ID role berdasarkan jenis akun.
-        $roleId = $data['role'] === 'pengelola'
+        $isPengelola = $data['role'] === 'pengelola';
+
+        $roleId = $isPengelola
             ? Role::PENGELOLA
             : Role::MAHASISWA;
 
-        // Menyesuaikan identitas dengan kolom lama.
-        $nim = $data['jenis_identitas'] === 'nim'
-            ? $data['nomor_identitas']
-            : null;
-
-        $nip = $data['jenis_identitas'] === 'nip'
-            ? $data['nomor_identitas']
-            : null;
-
-        // Membuat pengguna dan relasi role dalam satu transaksi.
         DB::transaction(function () use (
             $data,
             $roleId,
-            $nim,
-            $nip
+            $isPengelola
         ) {
             $user = User::create([
-                'name'             => $data['name'],
-                'email'            => $data['email'],
-                'password'         => $data['password'],
-                'role'             => $data['role'],
+                'name'     => $data['name'],
+                'email'    => $data['email'],
+                'password' => $data['password'],
+                'role'     => $data['role'],
 
-                // Menyimpan identitas utama.
-                'jenis_identitas'  => $data['jenis_identitas'],
-                'nomor_identitas'  => $data['nomor_identitas'],
+                // Mahasiswa menggunakan NIM.
+                // Pengelola menggunakan NIP.
+                'nim' => $isPengelola
+                    ? null
+                    : ($data['nim'] ?? null),
 
-                // Menjaga kompatibilitas dengan kolom lama.
-                'nim'              => $nim,
-                'nip'              => $nip,
+                'nip' => $isPengelola
+                    ? ($data['nip'] ?? null)
+                    : null,
             ]);
 
-            // Menyimpan relasi pengguna dengan role.
             UserRole::create([
                 'user_id' => $user->id,
                 'role_id' => $roleId,
@@ -163,7 +147,6 @@ class AuthController extends Controller
     {
         Auth::logout();
 
-        // Menghapus session lama dan membuat token baru.
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

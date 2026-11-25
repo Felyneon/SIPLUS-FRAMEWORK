@@ -17,7 +17,7 @@
 <div class="flex flex-wrap gap-2 mb-4 text-sm">
     @foreach ([null => 'Semua', 'menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'ditolak' => 'Ditolak'] as $key => $label)
         <a href="{{ route('admin.peminjaman.index', $key ? ['status' => $key] : []) }}"
-           class="rounded-full px-3 py-1.5 {{ ($status ?? null) === match($key) { 'menunggu' => 'Pending', 'disetujui' => 'Disetujui', 'ditolak' => 'Ditolak', default => null } ? 'bg-blue-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
+        class="rounded-full px-3 py-1.5 {{ ($status ?? null) === match($key) { 'menunggu' => 'Pending', 'disetujui' => 'Disetujui', 'ditolak' => 'Ditolak', default => null } ? 'bg-blue-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
             {{ $label }}@if($key === 'menunggu') ({{ $ringkasan['Pending'] ?? 0 }})@endif
         </a>
     @endforeach

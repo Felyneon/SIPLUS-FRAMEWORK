@@ -54,6 +54,7 @@ class PeminjamanController extends Controller
 
             $mulai = $data['tanggal_mulai'];
             $selesai = $data['tanggal_selesai'];
+            $keperluanFinal = $data['keperluan'];
 
             $bentrok = Peminjaman::where('ruangan_id', $ruangan->id)
                 ->where('status', Peminjaman::STATUS_DISETUJUI)
@@ -66,10 +67,23 @@ class PeminjamanController extends Controller
             }
 
             Peminjaman::create([
-                ...$data,
-                'user_id' => Auth::id(),
-                'status'  => Peminjaman::STATUS_PENDING,
-            ]);
+    'user_id'          => Auth::id(),
+    'ruangan_id'       => $ruangan->id,
+
+    // Informasi akademik
+    'nama_matkul'      => $data['nama_matkul'],
+    'dosen_pengampu'   => $data['dosen_pengampu'],
+    'prodi'            => $data['prodi'],
+
+    // Informasi peminjaman
+    'tanggal_mulai'    => $mulai,
+    'tanggal_selesai'  => $selesai,
+    'keperluan'        => $keperluanFinal,
+
+    // Status awal pengajuan
+    'status'           => Peminjaman::STATUS_PENDING,
+    'alasan_penolakan' => null,
+]);
 
             return true;
         });
@@ -116,11 +130,11 @@ class PeminjamanController extends Controller
         $status = $this->statusFilter($request);
 
         $peminjamans = Peminjaman::with(['user', 'ruangan'])
-            ->when($status, fn ($query) => $query->where('status', $status))
-            ->orderByRaw("CASE status WHEN 'Pending' THEN 0 ELSE 1 END")
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+    ->when($status, fn ($query) => $query->where('status', $status))
+    ->orderBy('created_at', 'asc')
+    ->orderBy('id', 'asc')
+    ->paginate(10)
+    ->withQueryString();
 
         $ringkasan = Peminjaman::selectRaw('status, COUNT(*) AS total')
             ->groupBy('status')
