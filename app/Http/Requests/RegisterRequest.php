@@ -64,7 +64,7 @@ class RegisterRequest extends FormRequest
             // Kode khusus untuk registrasi pengelola.
             'kode_pengelola' => [
                 'nullable',
-                'required_if:role,pengelola',
+                'string',
                 Rule::in([(string) config('siplus.kode_pengelola')]),
             ],
         ];
